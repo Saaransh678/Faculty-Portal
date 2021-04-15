@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- <div class="col-md-6 col-md-offset-4"> -->
+
+<div class="row  pt-5">
+    <div class="col"></div>
+    <div class="col-6">
+        <div class=" container">
+
+            <!-- style="height: 60vh; width:50vw; left: 5vw;" -->
+            <!-- col-md-7 col-md-offset-4 -->
+            <div class="card">
+                <div class="card-header text-white bg-dark">
+                    <h3>Login</h3>
+                </div>
+                <div class="card-body">
+                    <form class="LoginForm" , action="#" , method="POST">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+
+                            <input type="text" name="username" value="" type="text" class="form-control" id="username"
+                                required>
+                            <!-- <div id="emailHelp" class="form-text">Enter your Faculty ID.</div> -->
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" name="password" class="form-control" id="password" required>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="cross_cut">
+                            <label class="form-check-label" for="cross_cut">Cross Cutting</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col"></div>
+</div>
+{% endblock %}
