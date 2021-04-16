@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 class LoginForm(forms.Form):
     username = forms.CharField(label='username')
     password = forms.CharField(widget=forms.PasswordInput)
+    is_cross = forms.BooleanField(initial=False, required=False)
 
     # class Meta:
     #     model = User

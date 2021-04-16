@@ -10,7 +10,6 @@ def index(request):
 
 
 def register_request(request):
-    messages.error(request, 'We could not process your request at this time.')
     if request.method == "POST":
         form = NewUserForm(request.POST)
         if form.is_valid():
@@ -21,3 +20,9 @@ def register_request(request):
         messages.error(request, "Unsuccessful Registration")
     form = NewUserForm
     return render(request=request, template_name="main\\register.html", context={"register_form": form})
+
+
+def sample_render(request):
+    messages.success(request, "Succesful Load")
+    return redirect('/')
+    # return HttpResponse("Good Load")

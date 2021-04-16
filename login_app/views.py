@@ -13,24 +13,30 @@ def login_req(request):
         if form.is_valid():
             username = form.cleaned_data['username']
             password = form.cleaned_data['password']
-            user = authenticate(username=username, password=password)
 
-            if user is not None:
-                messages.success(request, "SuccesFul Login!!")
-                print("SuccesFul Login!!")
-                return HttpResponse("SuccesFul Login, Home page Here")
-                # Save session as cookie to login the user
-                # login(request, user)
-                # Success, now let's login the user.
-                # return render(request, '/main/register')
+            if form.cleaned_data['is_cross'] == True:
+                # Special Permissions Processing
+                print("Super")
+
             else:
-                messages.error(request, "Failed Login!! :' (")
-                return HttpResponse("Incorrect Username/Pass")
-            # Incorrect credentials, let's throw an error to the screen.
-            # return render(request, 'ecommerce/user/login.html', {'error_message': 'Incorrect username and / or password.'})
+                user = authenticate(username=username, password=password)
+
+                if user is not None:
+                    print("SuccesFul Login!!")
+                    login(request, user)
+                    messages.success(request, "SuccesFul Login!!")
+                    return HttpResponse("SuccesFul Login, Home page Here")
+
+                else:
+                    messages.error(request, "Failed Login!! :' (")
+                    return HttpResponse("Incorrect Username/Pass")
+
+            # Check Later
+                # Incorrect credentials, let's throw an error to the screen.
+                # return render(request, 'ecommerce/user/login.html', {'error_message': 'Incorrect username and / or password.'})
+
         else:
             print(form.errors)
-            return HttpResponse("Invalid Form")
+            return HttpResponse("Invalid Form, Check Error")
 
-    else:
-        return render(request=request, template_name="loginpage.html")
+    return render(request=request, template_name="loginpage.html")
