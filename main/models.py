@@ -26,7 +26,7 @@ class activeleaveentries(models.Model):
     No_of_leaves=models.IntegerField()
     current_status=models.IntegerField()
     comment=models.TextField()
-class comments(model.Model):
+class comments(models.Model):
     entryid=models.UUIDField()
     body=models.TextField()
     fromfacultyid=models.CharField(max_length=122)
