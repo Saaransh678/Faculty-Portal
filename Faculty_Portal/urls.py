@@ -28,17 +28,19 @@ import django
 
 
 def set_pass(request):
-    user_ids = [100, 101]
-    password = ['some_pass112', 'another_pass2345']
+    user_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
+                14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+    passwords = ['ruZIze93l3', '58FeMvtFRP', 'VJWrluHjUx', 'lQvWLY47iw', 'DOROHtTB2M', 'ENxZgsML5J', 'sQE4HtaLN1', 'l8hTn79A4e', 'KOkFaEyVWo', 'UmBDatAwpd', '4gEcLxfoLx', 'gsr56632aj',
+                 '748qkBy7Kn', 'zOT4EhzRD4', '1SIyhcIbJu', 'dxpVL9awVG', 'V89xtrgR0X', 'Js1nIzSwOl', 'ClYKUC9nwZ', 'T8QvqH3zXg', 'wOWUr750Cl', 's7IdGxZhaw', 'XN70Xhwo8A', 'P2mBCOi1zV', 'TAnrcEjrlj']
 
     for i in range(len(user_ids)):
-        user_id, password = (user_ids[i], password[i])
+        user_id, password = (user_ids[i], passwords[i])
         u = User.objects.get(id=user_id)
         if u is not None:
             u.set_password(password)
             u.save()
 
-        return HttpResponse("Resetted Passwords")
+    return HttpResponse("Resetted Passwords")
 
 
 def list_apps(request):

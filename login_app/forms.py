@@ -11,3 +11,9 @@ class LoginForm(forms.Form):
     # class Meta:
     #     model = User
     #     fields = ("username", "email", "password1", "password2")
+
+
+class NewApplicationForm(forms.Form):
+    startdate = forms.DateField()
+    enddate = forms.DateField()
+    description = forms.CharField(max_length=300)
