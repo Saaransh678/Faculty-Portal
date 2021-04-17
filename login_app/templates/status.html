@@ -1,0 +1,27 @@
+{% extends 'logined.html' %}
+{% block content %}
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Application Date</th>
+      <th scope="col">Starting Date</th>
+      <th scope="col">No. of Leaves</th>
+      <th scope="col">Current Status</th>
+      <th scope="col">Comments</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for i in atv %}
+    <tr>
+      <td>{{i.entryid}}</td>
+      <td>{{i.application_date}}</td>
+      <td>{{i.Starting_date}}</td>
+      <td>{{i.No_of_leaves}}</td>
+      <td>{{i.current_status}}</td>
+      <td>{{i.comments}}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock%}

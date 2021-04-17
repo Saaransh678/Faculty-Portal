@@ -1,0 +1,21 @@
+{% extends 'logined.html' %}
+{% block content %}
+<h1 class="text-center">New Application Leave</h1>
+<div class="container">
+    <form>
+        <div class="mb-3">
+            <label for="exampleInputapplidate" class="form-label">Application Date</label>
+            <input type="date" class="form-control" id="exampleInputapplidate" aria-describedby="emailHelp">
+        </div>
+        <div class="mb-3">
+            <label for="exampleInputstartdate" class="form-label">Starting Date</label>
+            <input type="date" class="form-control" id="exampleInputstartingdate" aria-describedby="emailHelp">
+        </div>
+        <div class="mb-3">
+            <label for="exampleInputno_of_leaves" class="form-label">Number of Leaves</label>
+            <input type="number" class="form-control" id="exampleInputstartingdate" aria-describedby="emailHelp">
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
+{% endblock%}
