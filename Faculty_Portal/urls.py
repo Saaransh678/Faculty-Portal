@@ -23,6 +23,8 @@ from django.views.generic.base import RedirectView
 from .views import base_page
 from django.contrib.auth.models import User
 from django.http import HttpResponse
+from django.apps import apps
+import django
 
 
 def set_pass(request):
@@ -39,12 +41,30 @@ def set_pass(request):
         return HttpResponse("Resetted Passwords")
 
 
+def list_apps(request):
+    # save = "Login_App, Administration, Authentication and Authorization, Content Types, Sessions, Messages, Static Files, Crispy_Forms, "
+    app_names = ""
+    # app_list = ['main', 'login_app']
+    # django.apps.apps.populate(installed_apps=app_list)
+    # django.apps.apps.set_available_apps(['main'])
+    for app in apps.get_app_configs():
+        app_names += app.verbose_name + ", "
+        print(app.verbose_name)
+    return HttpResponse(app_names)
+
+
+def deleteAll(request):
+    User.objects.all().delete()
+    return HttpResponse("WARNING SAB UDD GYA")
+
+
 urlpatterns = [
-    path('', base_page),
     path('admin/', admin.site.urls),
     path('main/', include('main.urls')),
-    path('login/', include('login_app.urls')),
+    path('', include('login_app.urls')),
     path('favicon.ico', RedirectView.as_view(
         url=staticfiles_storage.url('images/favicon.ico'))),
     path('set_pass/', set_pass),
+    path('list_apps/', list_apps),
+    # path('deleteAll/', deleteAll)
 ]

@@ -1,11 +1,16 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
 from .forms import LoginForm
 from django.contrib import messages
 from django.http import HttpResponse
-
+from login_app.models import Faculty, activeleaveentries
 # Create your views here.
-
+def index(request):
+    print(request.user)
+    if request.user.is_anonymous:
+        return redirect('/login')
+    return render(request,"logined.html")
 
 def login_req(request):
     if request.method == 'POST':
@@ -23,10 +28,8 @@ def login_req(request):
                 user = authenticate(username=username, password=password)
 
                 if user is not None:
-                    print("SuccesFul Login!!")
                     login(request, user)
-                    messages.success(request, "SuccesFul Login!!")
-                    return HttpResponse("SuccesFul Login, Home page Here")
+                    return redirect("/")
 
                 else:
                     messages.error(request, "Failed Login!! :' (")
@@ -41,3 +44,13 @@ def login_req(request):
             return HttpResponse("Invalid Form, Check Error")
 
     return render(request=request, template_name="loginpage.html")
+def logoutuser(request):
+    logout(request)
+    return redirect("/login")
+def profile(request):
+    return render(request=request, template_name="profile.html")
+def application(request):
+    return render(request=request, template_name="application.html")
+def status(request):
+    actv= activeleaveentries.objects.all()
+    return render(request=request, template_name="status.html",context={'atv':actv})

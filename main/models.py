@@ -34,7 +34,8 @@ class Active_Leave_Entries(models.Model):
     application_date = models.DateField()
     starting_date = models.DateField()
     num_leaves = models.IntegerField()
-    current_status = models.IntegerField()
+    curr_status = models.IntegerField()
+    description = models.TextField(default="")
 
 
 class Comments(models.Model):
@@ -46,9 +47,9 @@ class Comments(models.Model):
 
 
 class Previous_Record(models.Model):
-    EntryID = models.IntegerField(primary_key=True)
-    DecisionMakerID = models.IntegerField()
+    EntryID = models.AutoField(primary_key=True)
     ApplicantID = models.IntegerField()
+    DecisionMakerID = models.IntegerField()
     starting_date = models.DateField()
     num_leaves = models.IntegerField()
     decisiondate = models.DateField()
