@@ -14,15 +14,22 @@ def register_request(request):
         form = NewUserForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)
+            # login(request, user)
             messages.success(request, "Successfully Registered.")
+            # print(request.POST)
+            # print(form)
             return redirect('/login/')
-        messages.error(request, "Unsuccessful Registration")
+        else:
+            messages.error(request, "Error in Submission")
     form = NewUserForm
     return render(request=request, template_name="main\\register.html", context={"register_form": form})
 
 
 def sample_render(request):
+    # from django.contrib.auth.models import User
+    # u = User.objects.get(id='100')
+    # u.set_password('new password')
+    # u.save()
     messages.success(request, "Succesful Load")
     return redirect('/')
     # return HttpResponse("Good Load")

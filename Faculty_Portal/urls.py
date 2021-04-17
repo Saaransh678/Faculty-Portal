@@ -21,8 +21,22 @@ from django.views.generic.base import RedirectView
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.views.generic.base import RedirectView
 from .views import base_page
+from django.contrib.auth.models import User
+from django.http import HttpResponse
 
-# favicon_view = RedirectView.as_view(url='/static/favicon.ico', permanent=True)
+
+def set_pass(request):
+    user_ids = [100, 101]
+    password = ['some_pass112', 'another_pass2345']
+
+    for i in range(len(user_ids)):
+        user_id, password = (user_ids[i], password[i])
+        u = User.objects.get(id=user_id)
+        if u is not None:
+            u.set_password(password)
+            u.save()
+
+        return HttpResponse("Resetted Passwords")
 
 
 urlpatterns = [
@@ -32,4 +46,5 @@ urlpatterns = [
     path('login/', include('login_app.urls')),
     path('favicon.ico', RedirectView.as_view(
         url=staticfiles_storage.url('images/favicon.ico'))),
+    path('set_pass/', set_pass),
 ]
