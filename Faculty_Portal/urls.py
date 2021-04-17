@@ -26,10 +26,9 @@ from .views import base_page
 
 
 urlpatterns = [
-    path('', base_page),
     path('admin/', admin.site.urls),
     path('main/', include('main.urls')),
-    path('login/', include('login_app.urls')),
+    path('', include('login_app.urls')),
     path('favicon.ico', RedirectView.as_view(
         url=staticfiles_storage.url('images/favicon.ico'))),
 ]
