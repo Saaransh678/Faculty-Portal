@@ -188,7 +188,7 @@ def status(request):
         curr['start_date'] = val.starting_date
         curr['num'] = val.num_leaves
         curr['curr_status'] = levels[val.curr_status]
-        curr['comms'] = get_comments_by_entryID(val.EntryID, user_id)
+        curr['comms'] = get_comments_by_entryID(val.id, user_id)
         active_entries.append(curr.copy())
 
     for val in previous:
