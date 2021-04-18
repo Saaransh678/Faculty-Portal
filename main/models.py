@@ -30,19 +30,19 @@ class Previous_Cross_Cutting(models.Model):
 
 class Active_Leave_Entries(models.Model):
     # auto incrementing id field
-    FacultyID = models.CharField(max_length=122)
+    FacultyID = models.IntegerField(unique=True)
     application_date = models.DateField()
     starting_date = models.DateField()
     num_leaves = models.IntegerField()
     curr_status = models.IntegerField()
-    description = models.TextField(default="")
+    # description = models.TextField(default="")
 
 
 class Comments(models.Model):
     # auto incrementing id field
     EntryID = models.IntegerField()  # Foreign Key with Active_Leave_Entries
     timecreated = models.DateField()
-    body = models.TextField()
+    body = models.TextField(default="")
     FromFacultyID = models.CharField(max_length=122)
 
 

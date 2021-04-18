@@ -1,27 +1,106 @@
 {% extends 'logined.html' %}
 {% block content %}
-<table class="table">
-  <thead>
+
+<H2 class="px-3 pt-5">Active Entry </H2>
+
+{% if act_cnt %}
+<table class="table m-4 ">
+  <thead class="table-dark">
+
+
     <tr>
+      <th scope="col"></th>
       <th scope="col">#</th>
       <th scope="col">Application Date</th>
       <th scope="col">Starting Date</th>
       <th scope="col">No. of Leaves</th>
       <th scope="col">Current Status</th>
-      <th scope="col">Comments</th>
     </tr>
   </thead>
   <tbody>
     {% for i in atv %}
-    <tr>
-      <td>{{i.entryid}}</td>
+    <tr class="table-primary">
+    <tr class="accordion-toggle {% if i.was_approved %} table-success {% else %} table-danger {% endif %}">
+      <td class="btn btn-dark" data-bs-toggle="collapse" href="#multiCollapseExample{{i.id}}" role="button"
+        aria-expanded="false" aria-controls="multiCollapseExample{{i.id}}">Exp</td>
+      <td>{{i.id}}</td>
       <td>{{i.application_date}}</td>
-      <td>{{i.Starting_date}}</td>
-      <td>{{i.No_of_leaves}}</td>
-      <td>{{i.current_status}}</td>
-      <td>{{i.comments}}</td>
+      <td>{{i.start_date}}</td>
+      <td>{{i.num}}</td>
+      <td>{{i.curr_status}}</td>
+    </tr>
+
+    <tr class="collapse multi-collapse" id="multiCollapseExample{{i.id}}">
+      <td>
+        <H5>Comments: </H5>
+      </td>
+
+      <td colspan="3">
+        {% for comm in i.comms %}
+        <div class="row">
+          <div class="col-2">{{comm.from}}: </div>
+          <div class="col-6">{{comm.body}} </div>
+        </div>
+        {% endfor %}
+      </td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
+
+{% else %}
+<H4 class="mx-3">No active entries</H4>
+{% endif %}
+
+{% if past_cnt %}
+<H2 class="px-3 pt-5">Previous Entries </H2>
+<div class="table">
+  <table class="table m-4 ">
+    <thead class="table-dark">
+      <tr>
+        <th scope="col"></th>
+        <th scope="col">#</th>
+        <th scope="col">Application Date</th>
+        <th scope="col">No. of Leaves</th>
+        <th scope="col">Decison Date</th>
+        <th scope="col">Decision By</th>
+        <th scope="col">Was Approved</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for i in past %}
+      <tr class="accordion-toggle {% if i.was_approved %} table-success {% else %} table-danger {% endif %}">
+        <td class="btn btn-dark" data-bs-toggle="collapse" href="#multiCollapseExample{{i.id}}" role="button"
+          aria-expanded="false" aria-controls="multiCollapseExample{{i.id}}">Exp</td>
+        <td>{{i.id}}</td>
+        <td>{{i.application_date}}</td>
+        <td>{{i.num}}</td>
+        <td>{{i.decision_date}}</td>
+        <td>{{i.decisionBy}}</td>
+        <td>{{i.was_approved}}</td>
+      </tr>
+
+      <tr class="collapse multi-collapse" id="multiCollapseExample{{i.id}}">
+        <td>
+          <H5>Comments </H5>
+        </td>
+
+        <td colspan="10">
+          {% for comm in i.comms %}
+          <div class="row">
+            <div class="col-4"><strong>{{comm.from}}: </strong></div>
+            <div class="col-6">{{comm.body}} </div>
+          </div>
+          {% endfor %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% else %}
+<H4 class="mx-3">No past entries</H4>
+
+{% endif %}
 {% endblock%}

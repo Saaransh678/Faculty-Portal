@@ -25,11 +25,24 @@ from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.apps import apps
 import django
+from main.models import Comments
+
+
+def sample_funct(request):
+    all_fields = Comments._meta.fields
+    string = ""
+    for val in all_fields:
+        string += str(val).split(".")[-1] + ", "
+    return HttpResponse(string)
 
 
 def set_pass(request):
     user_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
                 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+
+    usernames = ['fqF5zTtE8l', 'RRHGiynHEH', '66E9cozk0i', 'haT5tOIlyS', 'T4hWpnBjAb', 'zdAqmw5bXL', 'VvuNypIEem', 'aB1umpsFsU', 'MkGPsikwrn', 'bkdDx2eqlt', 'GYPGKz6Bk8', 'AYQnEkZZIn',
+                 '8Kom3Hdzlf', 'pS9hlqS2ot', 'Lc3RU6krLk', 'JpSxPfJkTg', 'aAQuTHT1tw', 'AklrHg11VL', 'URM1rZxLee', 'c2T61xfwDk', 'hod_cse', 'hod_ee', 'hod_me', 'dean_aa', 'director']
+
     passwords = ['ruZIze93l3', '58FeMvtFRP', 'VJWrluHjUx', 'lQvWLY47iw', 'DOROHtTB2M', 'ENxZgsML5J', 'sQE4HtaLN1', 'l8hTn79A4e', 'KOkFaEyVWo', 'UmBDatAwpd', '4gEcLxfoLx', 'gsr56632aj',
                  '748qkBy7Kn', 'zOT4EhzRD4', '1SIyhcIbJu', 'dxpVL9awVG', 'V89xtrgR0X', 'Js1nIzSwOl', 'ClYKUC9nwZ', 'T8QvqH3zXg', 'wOWUr750Cl', 's7IdGxZhaw', 'XN70Xhwo8A', 'P2mBCOi1zV', 'TAnrcEjrlj']
 
@@ -63,6 +76,7 @@ def deleteAll(request):
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('main/', include('main.urls')),
+    path('check/', sample_funct),
     path('', include('login_app.urls')),
     path('favicon.ico', RedirectView.as_view(
         url=staticfiles_storage.url('images/favicon.ico'))),
