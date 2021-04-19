@@ -37,6 +37,14 @@ def clean_comments(input_comment):
     return outp
 
 
+def dictfetchall(cursor):
+    columns = [col[0] for col in cursor.description]
+    return [
+        dict(zip(columns, row))
+        for row in cursor.fetchall()
+    ]
+
+
 def get_active_leaves(user_id):
     check_querr = f'SELECT * FROM "main_active_leave_entries" where "FacultyID" = {user_id}'
     check_res = Active_Leave_Entries.objects.raw(check_querr)
@@ -44,8 +52,11 @@ def get_active_leaves(user_id):
 
 
 def exec_querry(querry):
-    cursor = connections['default'].cursor()
-    cursor.execute(querry)
+    outp = {}
+    with connections['default'].cursor() as cursors:
+        cursors.execute(querry)
+        outp = dictfetchall(cursors)
+    return outp
 
 
 def index(request):

@@ -25,11 +25,12 @@ from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.apps import apps
 import django
-from main.models import Comments
+from main.models import Comments, Previous_Record
+from django.db import connections
 
 
 def sample_funct(request):
-    all_fields = Comments._meta.fields
+    all_fields = Previous_Record._meta.fields
     string = ""
     for val in all_fields:
         string += str(val).split(".")[-1] + ", "
@@ -82,5 +83,6 @@ urlpatterns = [
         url=staticfiles_storage.url('images/favicon.ico'))),
     path('set_pass/', set_pass),
     path('list_apps/', list_apps),
+
     # path('deleteAll/', deleteAll)
 ]

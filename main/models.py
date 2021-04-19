@@ -54,3 +54,11 @@ class Previous_Record(models.Model):
     num_leaves = models.IntegerField()
     decisiondate = models.DateField()
     was_approved = models.BooleanField()
+
+
+class Info_Scheme(models.Model):
+    curr_year = models.IntegerField()
+    last_clean_date = models.DateField()
+
+
+# class Session_Data(models.Model):

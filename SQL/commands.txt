@@ -1,0 +1,51 @@
+-- user_id = -1 for cleaning active by date, else for normal active entries for user_id
+
+CREATE OR REPLACE FUNCTION remove_from_active(user_id int, decision_id int, verdict bool)
+returns void AS $$
+declare
+    curr_date DATE;
+    last_date DATE;
+    start_date DATE;    
+    number_leaves int;
+    curs refcursor;
+    row records;
+
+begin
+    SELECT last_clean_date from main_info_scheme into last_date;
+    SELECT CURRENT_DATE from main_info_scheme into curr_date;
+    if user_id = -1 then
+        if curr_date <= last_date
+            return;
+        END IF;
+        OPEN curs FOR (SELECT * from main_active_leave_entries where starting_date <= curr_date)
+    else
+        OPEN curs FOR (SELECT * from main_active_leave_entries where id = user_id )    
+    END IF;
+    
+    LOOP
+    FETCH curs into row;
+    exit when not found;
+
+    INSERT INTO previous_record("EntryID", "ApplicantID", "DecisionMakerID", starting_date, num_leaves, decisiondate, was_approved) VALUES(row.id, decision_id, row.starting_date, row.num_leaves, curr_date, verdict)
+    END LOOP
+end;
+$$ language 'plpgsql';
+
+
+DROP FUNCTION clean_active_entries();
+/*CREATE OR REPLACE FUNCTION clean_active_entries()
+returns void AS $$
+declare
+    curr_date DATE;
+    last_date DATE;
+
+begin
+    SELECT last_clean_date from main_info_scheme into last_date;
+    SELECT CURRENT_DATE main_info_scheme into curr_date;
+    if last_date < curr_date:
+
+    endif
+
+end;
+$$ language 'plpgsql';
+SELECT * from clean_active_entries();*/
