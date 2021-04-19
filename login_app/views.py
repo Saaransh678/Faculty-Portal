@@ -122,7 +122,34 @@ def profile(request):
         context_dict['perm'] = levels[faculty_details.permission_level]
 
     return render(request=request, template_name="profile.html", context=context_dict)
+def dictfetchall(cursor):
+    "Return all rows from a cursor as a dict"
+    columns = [col[0] for col in cursor.description]
+    return [
+        dict(zip(columns, row))
+        for row in cursor.fetchall()
+    ]
+def requests(request):
+    user = request.user
+    querry = f'SELECT * FROM main_faculty WHERE \"FacultyID\" ={user.id}'
+    res = Faculty.objects.raw(querry)
+    for faculty_details in res:
+        perm_level = faculty_details.permission_level
+    perm_level=perm_level-1
+    print(perm_level)
+    querry = f'select m1."FacultyID" as fac_id, a1.first_name as f_name, a1.last_name as s_name, m1.application_date as app_date, m1.starting_date as start_date, m1.num_leaves as n_leaves, m1.curr_status as cur_pos  from "main_active_leave_entries" as m1  , "main_faculty" as m2, "auth_user" as a1 where m1."FacultyID"=m2."FacultyID" and m1."FacultyID"=a1.id and m1.curr_status={perm_level};'
+    cursor = connections['default'].cursor()
+    cursor.execute(querry)
+    cur=dictfetchall(cursor)
+    cursor.close()
+    for obj in cur:
+        facul_id=obj['fac_id']
+        active = get_active_leaves(facul_id)
+        for val in active[1]:
+            obj['comms'] = get_comments_by_entryID(val.id, facul_id)
+        print(obj['comms'])
 
+    return render(request=request, template_name="requests.html", context={'details': cur})
 
 def application(request):
     if request.method == 'POST':
