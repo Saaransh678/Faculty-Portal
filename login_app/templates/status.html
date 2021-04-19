@@ -1,4 +1,11 @@
 {% extends 'logined.html' %}
+{% block nav_item%}
+{% if perm != "Faculty" %}
+<li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="/requests">Requests</a>
+          </li>
+{% endif %}
+{%endblock%}
 {% block content %}
 
 <H2 class="px-3 pt-5">Active Entry </H2>
@@ -37,7 +44,7 @@
         <td colspan="3">
           {% for comm in i.comms %}
           <div class="row">
-            <div class="col-2">{{comm.from}}: </div>
+            <div class="col-2"><b>{{comm.from}}: </b></div>
             <div class="col-6">{{comm.body}} </div>
           </div>
           {% endfor %}
