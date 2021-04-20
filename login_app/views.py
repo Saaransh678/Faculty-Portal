@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from .forms import LoginForm, NewApplicationForm
+from .forms import LoginForm, NewApplicationForm, RequestForm
 from django.contrib import messages
 from django.http import HttpResponse
 # from login_app.models import Faculty, activeleaveentries
@@ -53,12 +53,17 @@ def get_active_leaves(user_id):
     return (len(check_res), check_res)
 
 
-def exec_querry(querry):
+def exec_querry(querry, val=False):
     outp = {}
     with connections['default'].cursor() as cursors:
         cursors.execute(querry)
-        outp = dictfetchall(cursors)
+        if val:
+            outp = dictfetchall(cursors)
     return outp
+
+
+def clean_date(date):
+    return datetime.strptime(date[:-6], datetime_format)
 
 
 def index(request):
@@ -99,7 +104,7 @@ def login_req(request):
                 messages.error(
                     request, "Unexpected Error!! Try Refreshing the page")
     else:
-        redirect('/profile')
+        return redirect('/profile')
 
     return render(request=request, template_name="loginpage.html")
 
@@ -110,55 +115,78 @@ def logoutuser(request):
 
 
 def profile(request):
+    if request.user.is_anonymous:
+        return redirect('/login')
     user = request.user
     fullname = user.first_name + " " + user.last_name
 
     querry = f'SELECT * FROM main_faculty WHERE \"FacultyID\" ={user.id}'
     context_dict = {'email': user.email,
-                    'name': fullname, 'uname': user.username}
+                    'name': fullname, 'uname': user.username, 'has_perm': False}
     res = Faculty.objects.raw(querry)
     for faculty_details in res:
         context_dict['dept'] = departments[faculty_details.dept] + \
             " Department"
         context_dict['rem_leave'] = faculty_details.leaves_remaining
         context_dict['perm'] = levels[faculty_details.permission_level]
+        context_dict['has_permission'] = faculty_details.permission_level
 
     return render(request=request, template_name="profile.html", context=context_dict)
 
 
-def dictfetchall(cursor):
-    "Return all rows from a cursor as a dict"
-    columns = [col[0] for col in cursor.description]
-    return [
-        dict(zip(columns, row))
-        for row in cursor.fetchall()
-    ]
-
-
 def requests(request):
+    if request.method == "POST":
+        req_form = RequestForm(request.POST)
+        if req_form.is_valid():
+            print(req_form.cleaned_data)
+        else:
+            print(req_form.errors)
+
+    if request.user.is_anonymous:
+        return redirect('/login')
+    perm = False
     user = request.user
     querry = f'SELECT * FROM main_faculty WHERE \"FacultyID\" ={user.id}'
     res = Faculty.objects.raw(querry)
     for faculty_details in res:
         perm_level = faculty_details.permission_level
-    perm_level = perm_level-1
-    print(perm_level)
-    querry = f'select m1."FacultyID" as fac_id, a1.first_name as f_name, a1.last_name as s_name, m1.application_date as app_date, m1.starting_date as start_date, m1.num_leaves as n_leaves, m1.curr_status as cur_pos  from "main_active_leave_entries" as m1  , "main_faculty" as m2, "auth_user" as a1 where m1."FacultyID"=m2."FacultyID" and m1."FacultyID"=a1.id and m1.curr_status={perm_level};'
+        perm = bool(faculty_details.permission_level)
+    # perm_level = perm_level-1 -------------------------------------------------------------------------- CHECK
+    if perm_level < 1:
+        messages.warning("Error!: You are not authorised for the action.")
+        return redirect('/profile')
+    querry = f'select * from get_active_requests({perm_level});'
     cursor = connections['default'].cursor()
     cursor.execute(querry)
-    cur = dictfetchall(cursor)
+    cur = cursor.fetchall()
     cursor.close()
+    entries = []
     for obj in cur:
+        obj = obj[0]
+        obj['app_date'] = clean_date(obj['app_date'])
         facul_id = obj['fac_id']
         active = get_active_leaves(facul_id)
         for val in active[1]:
             obj['comms'] = get_comments_by_entryID(val.id, facul_id)
-        print(obj['comms'])
+        entries.append(obj.copy())
 
-    return render(request=request, template_name="requests.html", context={'details': cur})
+    return render(request=request, template_name="requests.html", context={'details': entries, 'has_permission': perm})
 
 
 def application(request):
+    perm = False
+    leave_cnt = 0
+    if request.user.is_anonymous:
+        return redirect('/login')
+    with connections['default'].cursor() as cursors:
+        cursors.execute(
+            f"select * from get_personal_id({request.user.id})")
+        res = cursors.fetchone()
+        res = res[0]
+        perm = res['permission_level']
+        user_id = res['FacultyID']
+        leave_cnt = res['leaves_remaining']
+
     if request.method == 'POST':
         form = NewApplicationForm(request.POST)
         if form.is_valid():
@@ -166,10 +194,7 @@ def application(request):
             end_date = form.cleaned_data['enddate']
             desc = clean_comments(form.cleaned_data['description'])
 
-            if(request.user.id > 5):
-                check_res = get_active_leaves(request.user.id)
-            else:
-                exec_querry(f"SELECT permission_level FROM ")
+            check_res = get_active_leaves(user_id)
 
             if check_res[0] > 0:
                 messages.error(
@@ -179,8 +204,8 @@ def application(request):
                 now = datetime.today().strftime('%Y-%m-%d')
                 insert_querry = f'INSERT INTO "main_active_leave_entries"("FacultyID", application_date, starting_date, num_leaves, curr_status) VALUES({request.user.id}, \'{now}\', \'{st_date}\', {(end_date - st_date).days}, 1)'
                 exec_querry(insert_querry)
-                check_res = get_active_leaves(request.user.id)
 
+                check_res = get_active_leaves(user_id)
                 insert_record = f"INSERT INTO main_decision_record(\"EntryID\", timecreated, body, verdict, \"DecisionMakerID\", is_active) VALUES({check_res[1][0].id}, '{now}', '{desc}', -1, '{request.user.id}', True)"
                 exec_querry(insert_record)
 
@@ -190,7 +215,7 @@ def application(request):
         else:
             print(form.error)
 
-    return render(request=request, template_name="application.html")
+    return render(request=request, template_name="application.html", context={'has_permission': perm, 'max_leaves': leave_cnt})
 
 
 def get_faculty_details(FacID):
@@ -199,16 +224,16 @@ def get_faculty_details(FacID):
 
 
 def get_comments_by_entryID(entryID, user_id):
-    querry = f'SELECT * FROM "main_comments" WHERE "EntryID" = {entryID} ORDER BY timecreated'
-    comm = Comments.objects.raw(querry)
+    querry = f'SELECT * FROM "main_decision_record" WHERE "EntryID" = {entryID} ORDER BY timecreated'
+    comm = Decision_Record.objects.raw(querry)
     curr_com = []
     for com_entry in comm:
         com = {}
         com['body'] = com_entry.body
-        if int(com_entry.FromFacultyID) == int(user_id):
+        if int(com_entry.DecisionMakerID) == int(user_id):
             com['from'] = 'Me'
         else:
-            res = get_faculty_details(com_entry.FromFacultyID)
+            res = get_faculty_details(com_entry.DecisionMakerID)
             for details in res:
                 from_post = levels[details.permission_level]
                 if details.permission_level == 0:
@@ -222,6 +247,14 @@ def get_comments_by_entryID(entryID, user_id):
 
 
 def status(request):
+    perm = False
+    with connections['default'].cursor() as cursors:
+        cursors.execute(
+            f"select * from get_personal_id({request.user.id})")
+        res = cursors.fetchone()
+        res = res[0]
+        perm = res['permission_level']
+
     user_id = request.user.id
     active = []
     prev = -1
@@ -234,7 +267,7 @@ def status(request):
         if val['EntryID'] != prev:
             new_val = {}
             new_val['id'] = val['EntryID']
-            new_val['application_date'] = val['application_date']
+            new_val['application_date'] = clean_date(val['application_date'])
             new_val['start_date'] = val['starting_date']
             new_val['num'] = val['num_leaves']
             new_val['curr_status'] = val['curr_status']
@@ -250,16 +283,16 @@ def status(request):
             res = cursors.fetchone()
             res = res[0]
             deciderID = res['FacultyID']
-            deciderName = res['first_name'] + res['last_name']
+            deciderName = res['first_name'] + " " + res['last_name']
             comment_details['from'] = deciderName
 
         if deciderID == val['FacultyID'] or val['DecisionMakerID'] == val['FacultyID']:
             comment_details['from'] = 'Me'
         else:
-            comment_details['body'] = val['body']
+            comment_details['from'] = deciderName
+        comment_details['body'] = val['body']
 
-        comment_details['createdon'] = datetime.strptime(
-            val['timecreated'][:-6], datetime_format)
+        comment_details['createdon'] = clean_date(val['timecreated'])
         active[-1]['comms'].append(comment_details.copy())
 
     # print(active)
@@ -298,7 +331,7 @@ def status(request):
             res = cursors.fetchone()
             res = res[0]
             deciderID = res['FacultyID']
-            deciderName = res['first_name'] + res['last_name']
+            deciderName = res['first_name'] + " " + res['last_name']
             comment_details['from'] = deciderName
 
         if deciderID == val['ApplicantID'] or val['DecisionMakerID'] == val['ApplicantID']:
@@ -308,8 +341,9 @@ def status(request):
 
         comment_details['createdon'] = datetime.strptime(
             val['timecreated'][:-6], datetime_format)
+        comment_details['body'] = val['body']
         previous_entries[-1]['comms'].append(comment_details.copy())
 
-    print(previous_entries)
+    print(previous_entries, active)
 
-    return render(request=request, template_name="status.html", context={'atv': active, 'act_cnt': len(active), 'past': previous_entries, 'past_cnt': len(previous_entries)})
+    return render(request=request, template_name="status.html", context={'atv': active, 'act_cnt': len(active), 'past': previous_entries, 'past_cnt': len(previous_entries), 'has_permission': perm})

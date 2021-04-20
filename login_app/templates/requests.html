@@ -1,11 +1,5 @@
 {% extends 'logined.html' %}
-{% block nav_item%}
-{% if perm != 'Faculty' %}
-<li class="nav-item">
-  <a class="nav-link active" aria-current="page" href="/requests">Requests</a>
-</li>
-{% endif %}
-{%endblock%}
+
 {% block content %}
 
 
@@ -41,64 +35,59 @@
             href="#multiCollapseExampleBA{{i.fac_id}}" role="button" aria-expanded="false"
             aria-controls="multiCollapseExampleBA{{i.fac_id}}" style="background-color:grey;">Comments</td>
         <tr class="collapse multi-collapse" id="multiCollapseExampleBA{{i.fac_id}}">
-          <td>
-            <H5>Comments: </H5>
-          </td>
 
-          <td colspan="3">
+          <td colspan="2">
+            <input type="radio" form="reqform{{i.fac_id}}" class="btn-check" data-bs-toggle="collapse"
+              href="#multiCollapseExampleA{{i.fac_id}}" aria-expanded="false"
+              aria-controls="multiCollapseExampleA{{i.fac_id}}" onclick="control(0, {{i.fac_id}})" autocomplete="off"
+              id="success{{i.fac_id}}" name="verdict" value=2 checked>
+            <label class="btn btn-outline-success" for="success{{i.fac_id}}">Approve</label>
+
+
+            <input type="radio" form="reqform{{i.fac_id}}" class="btn-check" data-bs-toggle="collapse"
+              href="#multiCollapseExampleA{{i.fac_id}}" aria-expanded="false"
+              aria-controls="multiCollapseExampleA{{i.fac_id}}" onclick="control(1, {{i.fac_id}})" name="verdict"
+              id="primary{{i.fac_id}}" value=1>
+            <label class="btn btn-outline-primary" for="primary{{i.fac_id}}">Redirect</label>
+
+
+
+            <input type="radio" form="reqform{{i.fac_id}}" class="btn-check" data-bs-toggle="collapse"
+              href="#multiCollapseExampleA{{i.fac_id}}" aria-expanded="false"
+              aria-controls="multiCollapseExampleA{{i.fac_id}}" onclick="control(2, {{i.fac_id}})" name="verdict"
+              id="danger{{i.fac_id}}" value=0>
+            <label class="btn btn-outline-danger" for="danger{{i.fac_id}}">Reject</label>
+
+
+            <div class="collapse multi-collapse" id="multiCollapseExampleA{{i.fac_id}}">
+              <form method="POST" class="RequestForm" id="reqform{{i.fac_id}}">
+                {% csrf_token %}
+                <label for="faculty_id" class="form-label" hidden>FacultyID</label>
+                <input type="number" id="faculty_id" name="faculty_id" value="{{i.fac_id}}" hidden>
+                <div class=" mb-3">
+                  <label for="comments" class="form-label">Comments</label>
+                  <textarea class="form-control" name="comments" id="description{{i.fac_id}}"
+                    style="height: 100px;"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+              </form>
+            </div>
+
+          </td>
+          <!-- <td>
+            <H5>Comments: </H5>
+          </td> -->
+
+          <td colspan="4">
             {% for comm in i.comms %}
             <div class="row">
-              <div class="col-6"><b>{{comm.from}}: </b></div>
-              <div class="col-10">{{comm.body}} </div>
+              <div class="col-5"><b>{{comm.from}}: </b></div>
+              <div class="col-7">{{comm.body}} </div>
             </div>
             {% endfor %}
           </td>
         </tr>
-        <td>
-          <span class="table-remove"><button type="button" class="btn btn-primary btn-rounded btn-sm my-0"
-              data-bs-toggle="collapse" href="#multiCollapseExampleA{{i.fac_id}}" aria-expanded="false"
-              aria-controls="multiCollapseExampleA{{i.fac_id}}" style="background-color:green;">Approve</button></span>
-          <span class="table-remove"><button type="button" class="btn btn-danger btn-rounded btn-sm my-0"
-              data-bs-toggle="collapse" href="#multiCollapseExampleB{{i.fac_id}}" aria-expanded="false"
-              aria-controls="multiCollapseExampleB{{i.fac_id}}">Reject</button></span>
 
-          <span class="table-remove"><button type="button" class="btn btn-primary btn-rounded btn-sm my-0"
-              data-bs-toggle="collapse" href="#multiCollapseExampleC{{i.fac_id}}" aria-expanded="false"
-              aria-controls="multiCollapseExampleC{{i.fac_id}}">Redirect</button></span>
-          <div class="collapse  multi-collapse" id="multiCollapseExampleA{{i.fac_id}}">
-            <form method="POST" class="RequestsForm">
-              {% csrf_token %}
-              <div class="mb-3">
-                <label for="examplecomments" class="form-label">Comments</label>
-                <input type="text" class="form-control" rows="9" value="Your Application is Approved" name="Approve"
-                  id="description" style="height: 100px;">
-              </div>
-              <button type="submit" class="btn btn-primary">Submit</button>
-            </form>
-          </div>
-          <div class="collapse  multi-collapse" id="multiCollapseExampleB{{i.fac_id}}">
-            <form method="POST" class="RequestsForm">
-              {% csrf_token %}
-              <div class="mb-3">
-                <label for="examplecomments" class="form-label">Comments</label>
-                <input type="text" class="form-control" rows="9" value="Your Application is Rejected"
-                  style="height: 100px;" name="Reject" id="description">
-              </div>
-              <button type="submit" class="btn btn-primary">Submit</button>
-            </form>
-          </div>
-          <div class="collapse  multi-collapse" id="multiCollapseExampleC{{i.fac_id}}">
-            <form method="POST" class="RequestsForm">
-              <div class="mb-3">
-                {% csrf_token %}
-                <label for="examplecomments" class="form-label">Comments</label>
-                <input type="text" class="form-control" rows="9" name="Redirect" id="description"
-                  style="height: 100px;">
-              </div>
-              <button type="submit" class="btn btn-primary">Submit</button>
-            </form>
-          </div>
-        </td>
 
         </tr>
         {% endfor%}
@@ -106,5 +95,19 @@
     </div>
   </div>
 </div>
-<!-- Editable table -->
+
+<script>
+  function control(val, id) {
+    dict = ["Your Application is Approved.", "Please Provide More Details.", "That won't be possible."];
+    if (document.getElementById("description" + id).value != dict[val]) {
+      document.getElementById("description" + id).value = dict[val];
+      document.getElementById("multiCollapseExampleA" + id).className = "multi-collapse collapse show";
+    }
+
+
+
+  }
+</script>
+
+
 {% endblock%}

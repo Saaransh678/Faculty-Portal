@@ -1,11 +1,5 @@
 {% extends 'logined.html' %}
-{% block nav_item%}
-{% if perm != "Faculty" %}
-<li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="/requests">Requests</a>
-          </li>
-{% endif %}
-{%endblock%}
+
 {% block content %}
 <style>
     body {

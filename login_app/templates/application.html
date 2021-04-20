@@ -1,11 +1,5 @@
 {% extends 'logined.html' %}
-{% block nav_item%}
-{% if perm != "Faculty" %}
-<li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="/requests">Requests</a>
-          </li>
-{% endif %}
-{%endblock%}
+
 {% block content %}
 <div class="row  pt-5">
     <div class="col"></div>
@@ -16,15 +10,15 @@
             <div class="mb-3">
                 <label for="startdate" class="form-label">Leave Start Date</label>
                 <input type="date" class="form-control" name="startdate" id="startdate" aria-describedby="emailHelp"
-                    onblur="verify()" required>
+                    onblur="verify({{max_leaves}})" required>
             </div>
             <div class="mb-3">
                 <label for="enddate" class="form-label">Rejoining Date</label>
                 <input type="date" class="form-control" id="enddate" name="enddate" aria-describedby="enddateFeedback"
-                    onblur="verify()" required>
-                <div id="enddateFeedback" class="invalid-feedback">
-                    Start Date Should be before end date.
-                </div>
+                    onblur="verify({{max_leaves}})" required>
+            </div>
+            <div id="enddateFeedback" class="invalid-feedback">
+                Start Date Should be before end date.
             </div>
 
             <div class="mb-3">
@@ -38,7 +32,7 @@
 </div>
 
 <script>
-    function verify() {
+    function verify(max_leaves) {
         var from = document.getElementById('startdate').value;
         var to = document.getElementById('enddate').value;
 
@@ -52,14 +46,20 @@
 
         var fromDate = Date.parse(from);
         var toDate = Date.parse(to);
-        console.log(from, fromDate, to, toDate, fromDate - toDate)
 
-        if (fromDate >= toDate) {
+        if (fromDate - toDate > 0) {
             document.getElementById('startdate').className = "form-control is-invalid";
             document.getElementById('enddate').className = "form-control is-invalid";
             document.getElementById('submitbutton').disabled = true;
         }
         else {
+            if ((toDate - fromDate) / (1000 * 3600 * 24) > max_leaves) {
+                alert("Error: You Only have {{max_leaves}} leaves left! Submit again to coninue with same start date and {{max_leaves}} days");
+                var result = new Date(fromDate);
+                result.setDate(result.getDate() + max_leaves);
+                document.getElementById('enddate').valueAsDate = result;
+            }
+
             document.getElementById('startdate').className = "form-control is-valid";
             document.getElementById('enddate').className = "form-control is-valid";
             document.getElementById('submitbutton').disabled = false;
