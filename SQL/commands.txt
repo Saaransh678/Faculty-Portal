@@ -1,5 +1,5 @@
 -- user_id = -1 for cleaning active by date, else for normal active entries for user_id
-
+-----------------------------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION remove_from_active(user_id int, decision_id int, verdict bool)
 returns void AS $$
 declare
@@ -30,10 +30,12 @@ begin
     END LOOP
 end;
 $$ language 'plpgsql';
+-----------------------------------------------------------------------------------------------
 
 
+/*-----------------
 DROP FUNCTION clean_active_entries();
-/*CREATE OR REPLACE FUNCTION clean_active_entries()
+CREATE OR REPLACE FUNCTION clean_active_entries()
 returns void AS $$
 declare
     curr_date DATE;
@@ -47,5 +49,63 @@ begin
     endif
 
 end;
+
 $$ language 'plpgsql';
-SELECT * from clean_active_entries();*/
+SELECT * from clean_active_entries();
+------------------------ */
+
+
+-----------------------------------------------------------------------------------------------
+ CREATE OR REPLACE FUNCTION get_personal_id(user_id int)
+ returns json AS $$
+ declare
+     level int;
+     personal_details record;
+ BEGIN
+        select permission_level into level from main_Faculty where "FacultyID" = user_id;
+        if user_id > 5 then
+            select main_faculty."FacultyID", main_faculty.dept, main_faculty.leaves_remaining, main_faculty.permission_level, auth_user.username, auth_user.email, auth_user.first_name, auth_user.last_name  into personal_details from main_Faculty, auth_user where "FacultyID" = user_id AND user_id = id;
+        else 
+            select main_faculty."FacultyID", main_faculty.dept, main_faculty.leaves_remaining, main_faculty.permission_level, auth_user.username, auth_user.email, auth_user.first_name, auth_user.last_name  into personal_details from main_Faculty, auth_user where permission_level = level AND "FacultyID" != user_id AND "FacultyID" = id;
+        end if;
+ 		return row_to_json(personal_details);
+
+ END;
+$$ LANGUAGE 'plpgsql';
+-----------------------------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION get_active_records(user_id int)
+RETURNS SETOF JSON AS $$
+Declare
+ rec record;
+BEGIN
+for rec in
+	Select * from main_decision_record as dec, main_active_leave_entries as act 
+	where act.id = "EntryID" and is_active = True and "FacultyID"=user_id
+	ORDER BY "EntryID", timecreated
+    loop
+        return next row_to_json(rec);
+    end loop;
+    
+END;
+$$ LANGUAGE 'plpgsql';
+-----------------------------------------------------------------------------------------------
+
+
+-----------------------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION get_past_records(user_id int)
+RETURNS SETOF JSON AS $$
+Declare
+ rec record;
+BEGIN
+for rec in
+	Select * from main_decision_record as dec, main_previous_request_record as prev
+	where prev."EntryID" = dec."EntryID" and is_active = False and "ApplicantID"=user_id
+	ORDER BY prev."EntryID", timecreated
+    loop
+        return next row_to_json(rec);
+    end loop;
+END;
+$$ LANGUAGE 'plpgsql';
+-----------------------------------------------------------------------------------------------

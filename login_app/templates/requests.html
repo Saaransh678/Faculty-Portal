@@ -37,64 +37,68 @@
           <td class="pt-3-half" contenteditable="false">{{i.app_date}}</td>
           <td class="pt-3-half" contenteditable="false">{{i.start_date}}</td>
           <td class="pt-3-half" contenteditable="false">{{i.n_leaves}}</td>
-          <td class="btn btn-primary btn-rounded btn-sm my-0" data-bs-toggle="collapse" href="#multiCollapseExampleBA{{i.fac_id}}" role="button"
-          aria-expanded="false" aria-controls="multiCollapseExampleBA{{i.fac_id}}" style="background-color:grey;">Comments</td>
-          <tr class="collapse multi-collapse" id="multiCollapseExampleBA{{i.fac_id}}">
-            <td>
-              <H5>Comments: </H5>
-            </td>
-    
-            <td colspan="3">
-              {% for comm in i.comms %}
-              <div class="row">
-                <div class="col-6"><b>{{comm.from}}: </b></div>
-                <div class="col-10">{{comm.body}} </div>
-              </div>
-              {% endfor %}
-            </td>
-          </tr>
+          <td class="btn btn-primary btn-rounded btn-sm my-0" data-bs-toggle="collapse"
+            href="#multiCollapseExampleBA{{i.fac_id}}" role="button" aria-expanded="false"
+            aria-controls="multiCollapseExampleBA{{i.fac_id}}" style="background-color:grey;">Comments</td>
+        <tr class="collapse multi-collapse" id="multiCollapseExampleBA{{i.fac_id}}">
           <td>
-            <span class="table-remove"><button type="button" class="btn btn-primary btn-rounded btn-sm my-0"
-                data-bs-toggle="collapse" href="#multiCollapseExampleA{{i.fac_id}}" aria-expanded="false" aria-controls="multiCollapseExampleA{{i.fac_id}}"
-                style="background-color:green;">Approve</button></span>
-            <span class="table-remove"><button type="button" class="btn btn-danger btn-rounded btn-sm my-0"
-                data-bs-toggle="collapse" href="#multiCollapseExampleB{{i.fac_id}}" aria-expanded="false"
-                aria-controls="multiCollapseExampleB{{i.fac_id}}">Reject</button></span>
-
-            <span class="table-remove"><button type="button" class="btn btn-primary btn-rounded btn-sm my-0"
-                data-bs-toggle="collapse" href="#multiCollapseExampleC{{i.fac_id}}" aria-expanded="false"
-                aria-controls="multiCollapseExampleC{{i.fac_id}}">Redirect</button></span>
-            <div class="collapse  multi-collapse" id="multiCollapseExampleA{{i.fac_id}}">
-              <form method="POST" class="RequestsForm">
-               {% csrf_token %}
-                <div class="mb-3">
-                  <label for="examplecomments" class="form-label">Comments</label>
-                  <input type="text" class="form-control" rows="9" value="Your Application is Approved" name="Approve" id="description" style="height: 100px;" >
-                </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
-              </form>
-            </div>
-            <div class="collapse  multi-collapse" id="multiCollapseExampleB{{i.fac_id}}">
-              <form method="POST" class="RequestsForm">
-               {% csrf_token %}
-                <div class="mb-3">
-                  <label for="examplecomments" class="form-label">Comments</label>
-                  <input type="text" class="form-control" rows="9" value="Your Application is Rejected" style="height: 100px;" name="Reject" id="description" >
-                </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
-              </form>
-            </div>
-            <div class="collapse  multi-collapse" id="multiCollapseExampleC{{i.fac_id}}">
-              <form method="POST" class="RequestsForm">
-                <div class="mb-3">
-                 {% csrf_token %}
-                  <label for="examplecomments" class="form-label">Comments</label>
-                  <input type="text" class="form-control" rows="9" name="Redirect" id="description" style="height: 100px;" >
-                </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
-              </form>
-            </div>
+            <H5>Comments: </H5>
           </td>
+
+          <td colspan="3">
+            {% for comm in i.comms %}
+            <div class="row">
+              <div class="col-6"><b>{{comm.from}}: </b></div>
+              <div class="col-10">{{comm.body}} </div>
+            </div>
+            {% endfor %}
+          </td>
+        </tr>
+        <td>
+          <span class="table-remove"><button type="button" class="btn btn-primary btn-rounded btn-sm my-0"
+              data-bs-toggle="collapse" href="#multiCollapseExampleA{{i.fac_id}}" aria-expanded="false"
+              aria-controls="multiCollapseExampleA{{i.fac_id}}" style="background-color:green;">Approve</button></span>
+          <span class="table-remove"><button type="button" class="btn btn-danger btn-rounded btn-sm my-0"
+              data-bs-toggle="collapse" href="#multiCollapseExampleB{{i.fac_id}}" aria-expanded="false"
+              aria-controls="multiCollapseExampleB{{i.fac_id}}">Reject</button></span>
+
+          <span class="table-remove"><button type="button" class="btn btn-primary btn-rounded btn-sm my-0"
+              data-bs-toggle="collapse" href="#multiCollapseExampleC{{i.fac_id}}" aria-expanded="false"
+              aria-controls="multiCollapseExampleC{{i.fac_id}}">Redirect</button></span>
+          <div class="collapse  multi-collapse" id="multiCollapseExampleA{{i.fac_id}}">
+            <form method="POST" class="RequestsForm">
+              {% csrf_token %}
+              <div class="mb-3">
+                <label for="examplecomments" class="form-label">Comments</label>
+                <input type="text" class="form-control" rows="9" value="Your Application is Approved" name="Approve"
+                  id="description" style="height: 100px;">
+              </div>
+              <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+          </div>
+          <div class="collapse  multi-collapse" id="multiCollapseExampleB{{i.fac_id}}">
+            <form method="POST" class="RequestsForm">
+              {% csrf_token %}
+              <div class="mb-3">
+                <label for="examplecomments" class="form-label">Comments</label>
+                <input type="text" class="form-control" rows="9" value="Your Application is Rejected"
+                  style="height: 100px;" name="Reject" id="description">
+              </div>
+              <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+          </div>
+          <div class="collapse  multi-collapse" id="multiCollapseExampleC{{i.fac_id}}">
+            <form method="POST" class="RequestsForm">
+              <div class="mb-3">
+                {% csrf_token %}
+                <label for="examplecomments" class="form-label">Comments</label>
+                <input type="text" class="form-control" rows="9" name="Redirect" id="description"
+                  style="height: 100px;">
+              </div>
+              <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+          </div>
+        </td>
 
         </tr>
         {% endfor%}

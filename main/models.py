@@ -31,34 +31,32 @@ class Previous_Cross_Cutting(models.Model):
 class Active_Leave_Entries(models.Model):
     # auto incrementing id field
     FacultyID = models.IntegerField(unique=True)
-    application_date = models.DateField()
+    application_date = models.DateTimeField()
     starting_date = models.DateField()
     num_leaves = models.IntegerField()
     curr_status = models.IntegerField()
     # description = models.TextField(default="")
 
 
-class Comments(models.Model):
+class Decision_Record(models.Model):
     # auto incrementing id field
-    EntryID = models.IntegerField()  # Foreign Key with Active_Leave_Entries
-    timecreated = models.DateField()
+    # Foreign Key with Active_Leave_Entries/Previous_Request_Record
+    EntryID = models.IntegerField()
+    timecreated = models.DateTimeField()
     body = models.TextField(default="")
-    FromFacultyID = models.CharField(max_length=122)
-
-
-class Previous_Record(models.Model):
-    EntryID = models.AutoField(primary_key=True)
-    ApplicantID = models.IntegerField()
     DecisionMakerID = models.IntegerField()
+    is_active = models.BooleanField(default=False)
+    verdict = models.IntegerField()  # 0 for reject, 1 for more comments, 2 for accepted
+
+
+class Previous_Request_Record(models.Model):
+    EntryID = models.IntegerField()  # Foreign Key with Active_Leave_Entries
+    ApplicantID = models.IntegerField()
     starting_date = models.DateField()
     num_leaves = models.IntegerField()
-    decisiondate = models.DateField()
     was_approved = models.BooleanField()
 
 
-class Info_Scheme(models.Model):
+class db_info(models.Model):
     curr_year = models.IntegerField()
     last_clean_date = models.DateField()
-
-
-# class Session_Data(models.Model):

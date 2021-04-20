@@ -97,12 +97,20 @@ DATABASES = {
     # }
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'HOST': 'queenie.db.elephantsql.com',
+        'HOST': 'ec2-3-234-85-177.compute-1.amazonaws.com',
         'PORT': '5432',
-        'NAME': 'lowpghnx',
-        'USER': 'lowpghnx',
-        'PASSWORD': 'AHMhZsF7Vvv7qkoZkwa-YXtMMV8-ayVA',
+        'NAME': 'df18p9b979dcgn',
+        'USER': 'hmnwhxrriwyzhj',
+        'PASSWORD': 'c02d3ad87980b500a64b491ec4287e3c3dc307aa3aca45762759de25b93d2f51',
     }
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.postgresql_psycopg2',
+    #     'HOST': 'queenie.db.elephantsql.com',
+    #     'PORT': '5432',
+    #     'NAME': 'lowpghnx',
+    #     'USER': 'lowpghnx',
+    #     'PASSWORD': 'AHMhZsF7Vvv7qkoZkwa-YXtMMV8-ayVA',
+    # }
 }
 
 
