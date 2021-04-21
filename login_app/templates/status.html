@@ -45,7 +45,7 @@
           {% endfor %}
         </td>
 
-        {% if i.curr_status == 1 %}
+        {% if i.curr_status == 0 %}
         <td>
           <form method="post" class="ResponseForm">
             {% csrf_token %}

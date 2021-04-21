@@ -141,7 +141,7 @@ def requests(request):
             Comment = clean_comments(req_form.cleaned_data['comments'])
             Facultyid = req_form.cleaned_data['faculty_id']
             verdict = req_form.cleaned_data['verdict']
-            now = datetime.today()
+            now = datetime.now()
             insert_record = ""
             insert_record1 = ""
             delete_record = ""
@@ -204,11 +204,12 @@ def requests(request):
 
     for faculty_details in res:
         perm_level = faculty_details["permission_level"]
-        perm = bool(faculty_details.permission_level)
+        perm = bool(faculty_details["permission_level"])
         department = faculty_details["dept"]
     # perm_level = perm_level-1 -------------------------------------------------------------------------- CHECK
     if perm_level < 1:
-        messages.warning("Error!: You are not authorised for the action.")
+        messages.warning(
+            request, "Error!: You are not authorised for the action.")
         return redirect('/profile')
     querry = f'select * from get_active_requests({perm_level}, \'{department}\');'
     cursor = connections['default'].cursor()
@@ -222,7 +223,7 @@ def requests(request):
         facul_id = obj['fac_id']
         active = get_active_leaves(facul_id)
         for val in active[1]:
-            obj['comms'] = get_comments_by_entryID(val.id, facul_id)
+            obj['comms'] = get_comments_by_entryID(val.id, facul_id, True)
         entries.append(obj.copy())
 
     return render(request=request, template_name="requests.html", context={'details': entries, 'has_permission': perm})
@@ -256,12 +257,11 @@ def application(request):
                     request, f"Error: You Already Have an Active Leave Entry with id = {check_res[1][0].id}")
 
             else:
-                now = datetime.today()
-                insert_querry = f'INSERT INTO "main_active_leave_entries"("FacultyID", application_date, starting_date, num_leaves, curr_status) VALUES({request.user.id}, \'{now}\', \'{st_date}\', {(end_date - st_date).days}, 1)'
+                insert_querry = f'INSERT INTO "main_active_leave_entries"("FacultyID", application_date, starting_date, num_leaves, curr_status) VALUES({request.user.id}, \'{datetime.today()}\', \'{st_date}\', {(end_date - st_date).days}, 1)'
                 exec_querry(insert_querry)
 
                 check_res = get_active_leaves(user_id)
-                insert_record = f"INSERT INTO main_decision_record(\"EntryID\", timecreated, body, verdict, \"DecisionMakerID\", is_active) VALUES({check_res[1][0].id}, '{now}', '{desc}', -1, '{request.user.id}', True)"
+                insert_record = f"INSERT INTO main_decision_record(\"EntryID\", timecreated, body, verdict, \"DecisionMakerID\", is_active) VALUES({check_res[1][0].id}, '{datetime.now()}', '{desc}', -1, '{request.user.id}', True)"
                 exec_querry(insert_record)
 
                 messages.success(
@@ -278,13 +278,16 @@ def get_faculty_details(FacID):
     return Faculty.objects.raw(querry)
 
 
-def get_comments_by_entryID(entryID, user_id):
-    querry = f'SELECT * FROM "main_decision_record" WHERE "EntryID" = {entryID} ORDER BY timecreated'
+def get_comments_by_entryID(entryID, user_id, is_act=False):
+    querry = f'SELECT * FROM "main_decision_record" WHERE "EntryID" = {entryID} and is_active = {is_act} ORDER BY timecreated'
     comm = Decision_Record.objects.raw(querry)
     curr_com = []
     for com_entry in comm:
         com = {}
         com['body'] = com_entry.body
+        com['verdict'] = com_entry.verdict
+        com['DecisionMakerID'] = com_entry.DecisionMakerID
+
         if int(com_entry.DecisionMakerID) == int(user_id):
             com['from'] = 'Me'
         else:
@@ -305,9 +308,10 @@ def status(request):
     if(request.user.is_anonymous):
         return redirect('/login')
     perm = False
+    user_id = request.user.id
     with connections['default'].cursor() as cursors:
         cursors.execute(
-            f"select * from get_personal_id({request.user.id})")
+            f"select * from get_personal_id({user_id})")
         res = cursors.fetchone()
         res = res[0]
         perm = res['permission_level']
@@ -315,7 +319,17 @@ def status(request):
     if request.method == "POST":
         form = ResponseForm(request.POST)
         if form.is_valid():
-            print(form.cleaned_data)
+            comm = clean_comments(form.cleaned_data['comments'])
+            entryid = form.cleaned_data['entryid']
+
+            dec_record = get_comments_by_entryID(entryid, user_id, True)
+            prev_id = dec_record[-1]['DecisionMakerID']
+            updated_level = get_faculty_details(prev_id)[0].permission_level
+
+            dec_rec = f'INSERT INTO main_decision_record("EntryID", timecreated, body, "DecisionMakerID", verdict, is_active) VALUES({entryid}, \'{datetime.now()}\', {comm}, {user_id}, -1,  True)'
+            update_record = f"UPDATE  main_active_leave_entries SET curr_status={updated_level} WHERE id={entryid}"
+            exec_querry(dec_rec)
+            exec_querry(update_record)
 
         else:
             print(form.errors)
