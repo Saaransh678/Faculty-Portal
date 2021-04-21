@@ -1,0 +1,142 @@
+{% extends 'logined.html' %}
+{% block content %}
+<table class="table  table-striped">
+  <thead>
+    <tr>
+      <th scope="col">Positon</th>
+      <th scope="col">Name</th>
+      <th scope="col">Appoint</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>{{deaninfo.position}}</b></td>
+      <td>{{deaninfo.name}}</td>
+      <td><button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapsedeanExample"
+          aria-expanded="false" aria-controls="collapsedeanExample">
+          Change
+        </button>
+        <div class="collapse" id="collapsedeanExample">
+          <div class="card card-body">
+            <table class="table  table-striped">
+              <thead>
+                <tr>
+                  <th scope="col">Faculty-id</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Department</th>
+                  <th scope="col">Appoint</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for i in Dean%}
+                <tr>
+                  <td><b>{{i.facultyid}}</b></td>
+                  <td>{{i.name}}</td>
+                  <td>{{i.dept}}</td>
+                  <td><button type="button" class="btn btn-primary">Appoint</button></td>
+                <tr>
+                  {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td><b>{{hodcseinfo.position}}</b></td>
+      <td>{{hodcseinfo.name}}</td>
+      <td><button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapsecseExample"
+          aria-expanded="false" aria-controls="collapsecseExample">
+          Change
+        </button>
+        <div class="collapse" id="collapsecseExample">
+          <div class="card card-body">
+            <table class="table  table-striped">
+              <thead>
+                <tr>
+                  <th scope="col">Faculty-id</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Appoint</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for i in computer%}
+                <tr>
+                  <td><b>{{i.facultyid}}</b></td>
+                  <td>{{i.name}}</td>
+                  <td><button type="button" class="btn btn-primary">Appoint</button></td>
+                <tr>
+                  {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td><b>{{hodeeinfo.position}}</b></td>
+      <td>{{hodeeinfo.name}}</td>
+      <td><button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseeeExample"
+          aria-expanded="false" aria-controls="collapseeeExample">
+          Change
+        </button>
+        <div class="collapse" id="collapseeeExample">
+          <div class="card card-body">
+            <table class="table  table-striped">
+              <thead>
+                <tr>
+                  <th scope="col">Faculty-id</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Appoint</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for i in Electrical%}
+                <tr>
+                  <td><b>{{i.facultyid}}</b></td>
+                  <td>{{i.name}}</td>
+                  <td><button type="button" class="btn btn-primary">Appoint</button></td>
+                <tr>
+                  {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td><b>{{hodmeinfo.position}}</b></td>
+      <td>{{hodmeinfo.name}}</td>
+      <td><button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapsemeExample"
+          aria-expanded="false" aria-controls="collapsemeExample">
+          Change
+        </button>
+        <div class="collapse" id="collapsemeExample">
+          <div class="card card-body">
+            <table class="table  table-striped">
+              <thead>
+                <tr>
+                  <th scope="col">Faculty-id</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Appoint</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for i in Mechanical%}
+                <tr>
+                  <td><b>{{i.facultyid}}</b></td>
+                  <td>{{i.name}}</td>
+                  <td><button type="button" class="btn btn-primary">Appoint</button></td>
+                <tr>
+                  {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+{%endblock %}
