@@ -16,10 +16,11 @@
                 <label for="enddate" class="form-label">Rejoining Date</label>
                 <input type="date" class="form-control" id="enddate" name="enddate" aria-describedby="enddateFeedback"
                     onblur="verify({{max_leaves}})" required>
+                <div id="enddateFeedback" class="invalid-feedback">
+                    Start Date Should be before end date.
+                </div>
             </div>
-            <div id="enddateFeedback" class="invalid-feedback">
-                Start Date Should be before end date.
-            </div>
+
 
             <div class="mb-3">
                 <label for="description">Description</label>
@@ -47,7 +48,7 @@
         var fromDate = Date.parse(from);
         var toDate = Date.parse(to);
 
-        if (fromDate - toDate > 0) {
+        if (fromDate - toDate >= 0) {
             document.getElementById('startdate').className = "form-control is-invalid";
             document.getElementById('enddate').className = "form-control is-invalid";
             document.getElementById('submitbutton').disabled = true;

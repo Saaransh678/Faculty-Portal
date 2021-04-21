@@ -25,3 +25,11 @@ class RequestForm(forms.Form):
 class ResponseForm(forms.Form):
     comments = forms.CharField(max_length=300)
     entryid = forms.IntegerField()
+
+
+class AppointmentForm(forms.Form):
+    post_id = forms.IntegerField()
+    new_fac_id = forms.IntegerField()
+    # f_name = forms.CharField()
+    # s_name = forms.CharField()
+    # dept = forms.CharField()

@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from .forms import LoginForm, NewApplicationForm, RequestForm, ResponseForm
+from .forms import LoginForm, NewApplicationForm, RequestForm, ResponseForm, AppointmentForm
 from django.contrib import messages
 from django.http import HttpResponse
 # from login_app.models import Faculty, activeleaveentries
@@ -15,7 +15,7 @@ departments = {'EE': 'Electrical',
                'ME': 'Mechanical', 'CSE': 'Computer Science'}
 
 levels = ['Faculty', 'Head of Department', 'Dean Faculty Affairs', 'Director']
-posi=["director", "Dean Faculty Affairs", "HOD-cse","HOD-ee", "HOD-me"]
+posi = ["director", "Dean Faculty Affairs", "HOD-cse", "HOD-ee", "HOD-me"]
 datetime_format = '%Y-%m-%dT%H:%M:%S'
 
 
@@ -122,7 +122,7 @@ def profile(request):
         return redirect('/login')
     user = request.user
     fullname = user.first_name + " " + user.last_name
-
+    exec_querry("SELECT clean_db()")
     querry = f'SELECT * FROM main_faculty WHERE \"FacultyID\" ={user.id}'
     context_dict = {'email': user.email,
                     'name': fullname, 'uname': user.username, 'has_perm': False}
@@ -138,6 +138,28 @@ def profile(request):
 
 
 def requests(request):
+    if request.user.is_anonymous:
+        return redirect('/login')
+
+    perm = 0
+    user = request.user
+    querry = f'SELECT * FROM get_personal_id({user.id})'
+    cursor = connections['default'].cursor()
+    cursor.execute(querry)
+    res = cursor.fetchone()
+    cursor.close()
+
+    for faculty_details in res:
+        perm_level = faculty_details["permission_level"]
+        perm = bool(faculty_details["permission_level"])
+        department = faculty_details["dept"]
+    # perm_level = perm_level-1 -------------------------------------------------------------------------- CHECK
+    if perm_level < 1:
+        messages.warning(
+            request, "Error!: You are not authorised for the action.")
+        return redirect('/profile')
+
+    exec_querry("SELECT clean_db()")
     if request.method == "POST":
         req_form = RequestForm(request.POST)
         if req_form.is_valid():
@@ -149,6 +171,8 @@ def requests(request):
             insert_record1 = ""
             delete_record = ""
             update_record = ""
+            update_record1 = ""
+            update_leaves = ""
             querry = f"select * from main_active_leave_entries where \"FacultyID\" ={Facultyid}"
             res = Active_Leave_Entries.objects.raw(querry)
             for faculty_details in res:
@@ -164,36 +188,43 @@ def requests(request):
                     res = cursors.fetchone()
                     res = res[0]
                     perm = res['permission_level']
-                    user_id = res['FacultyID']
                     leave_cnt = res['leaves_remaining']
                 if perm == 0:
                     if datetime.date(appli_date) > start_date:
                         if current_status == 3:
+                            update_leaves = f"UPDATE main_faculty SET leaves_remaining = {leave_cnt - leaves} where \"FacultyID\"= {Facultyid}"
                             insert_record = f"INSERT INTO main_decision_record(\"EntryID\", timecreated, body, verdict, \"DecisionMakerID\", is_active) VALUES({entryid}, '{now}', '{Comment}', 2, '{request.user.id}', False)"
                             insert_record1 = f"INSERT INTO main_previous_request_record(\"EntryID\", \"ApplicantID\", starting_date, num_leaves, was_approved) VALUES({entryid}, '{Facultyid}',\'{start_date}\','{leaves}' , True)"
+                            update_record1 = f"UPDATE main_decision_record SET is_active = false where \"EntryID\" = {entryid}"
                             delete_record = f"DELETE FROM main_active_leave_entries WHERE id={entryid}"
                         else:
                             insert_record = f"INSERT INTO main_decision_record(\"EntryID\", timecreated, body, verdict, \"DecisionMakerID\", is_active) VALUES({entryid}, '{now}', '{Comment}', 2, '{request.user.id}', True)"
                             update_record = f"UPDATE  main_active_leave_entries SET curr_status={current_status+1} WHERE id={entryid} "
                     else:
                         if current_status == 2:
+                            update_leaves = f"UPDATE main_faculty SET leaves_remaining = {leave_cnt - leaves} where \"FacultyID\"= {Facultyid}"
                             insert_record = f"INSERT INTO main_decision_record(\"EntryID\", timecreated, body, verdict, \"DecisionMakerID\", is_active) VALUES({entryid}, '{now}', '{Comment}', 2, '{request.user.id}', False)"
                             insert_record1 = f"INSERT INTO main_previous_request_record(\"EntryID\", \"ApplicantID\", starting_date, num_leaves, was_approved) VALUES({entryid}, '{Facultyid}',\'{start_date}\','{leaves}' , True)"
+                            update_record1 = f"UPDATE main_decision_record SET is_active = false where \"EntryID\" = {entryid}"
                             delete_record = f"DELETE FROM main_active_leave_entries WHERE id={entryid}"
                         else:
                             insert_record = f"INSERT INTO main_decision_record(\"EntryID\", timecreated, body, verdict, \"DecisionMakerID\", is_active) VALUES({entryid}, '{now}', '{Comment}', 2, '{request.user.id}', True)"
                             update_record = f"UPDATE  main_active_leave_entries SET curr_status={current_status+1} WHERE id={entryid} "
                 elif perm == 1 or perm == 2:
+                    update_leaves = f"UPDATE main_faculty SET leaves_remaining = {leave_cnt - leaves} where \"FacultyID\"= {Facultyid}"
                     insert_record = f"INSERT INTO main_decision_record(\"EntryID\", timecreated, body, verdict, \"DecisionMakerID\", is_active) VALUES({entryid}, '{now}', '{Comment}', 2, '{request.user.id}', False)"
                     insert_record1 = f"INSERT INTO main_previous_request_record(\"EntryID\", \"ApplicantID\", starting_date, num_leaves, was_approved) VALUES({entryid}, '{Facultyid}',\'{start_date}\','{leaves}' , True)"
+                    update_record1 = f"UPDATE main_decision_record SET is_active = false where \"EntryID\" = {entryid}"
                     delete_record = f"DELETE FROM main_active_leave_entries WHERE id={entryid}"
             elif verdict == '1':
                 insert_record = f"INSERT INTO main_decision_record(\"EntryID\", timecreated, body, verdict, \"DecisionMakerID\", is_active) VALUES({entryid}, '{now}', '{Comment}', 1, '{request.user.id}', True)"
                 update_record = f"UPDATE  main_active_leave_entries SET curr_status={0} WHERE id={entryid} "
             elif verdict == '0':
+                update_leaves = f"UPDATE main_faculty SET leaves_remaining = {leave_cnt - leaves} where \"FacultyID\"= {Facultyid}"
                 insert_record = f"INSERT INTO main_decision_record(\"EntryID\", timecreated, body, verdict, \"DecisionMakerID\", is_active) VALUES({entryid}, '{now}', '{Comment}', 0, '{request.user.id}', False)"
                 insert_record1 = f"INSERT INTO main_previous_request_record(\"EntryID\", \"ApplicantID\", starting_date, num_leaves, was_approved) VALUES({entryid}, '{Facultyid}',\'{start_date}\','{leaves}' , False)"
                 delete_record = f"DELETE FROM main_active_leave_entries WHERE id={entryid}"
+                update_record1 = f"UPDATE main_decision_record SET is_active = false where \"EntryID\" = {entryid}"
             if(len(insert_record) != 0):
                 exec_querry(insert_record)
             if(len(insert_record1) != 0):
@@ -202,23 +233,26 @@ def requests(request):
                 exec_querry(delete_record)
             if(len(update_record) != 0):
                 exec_querry(update_record)
+            if(len(update_record1) != 0):
+                exec_querry(update_record1)
+            if(len(update_leaves) != 0):
+                exec_querry(update_leaves)
         else:
             print(req_form.errors)
 
     if request.user.is_anonymous:
         return redirect('/login')
-    perm = False
+    perm = 0
     user = request.user
     querry = f'SELECT * FROM get_personal_id({user.id})'
     cursor = connections['default'].cursor()
     cursor.execute(querry)
     res = cursor.fetchone()
     cursor.close()
-    print(res)
 
     for faculty_details in res:
         perm_level = faculty_details["permission_level"]
-        perm = bool(faculty_details["permission_level"])
+        perm = faculty_details["permission_level"]
         department = faculty_details["dept"]
     # perm_level = perm_level-1 -------------------------------------------------------------------------- CHECK
     if perm_level < 1:
@@ -248,6 +282,9 @@ def application(request):
     leave_cnt = 0
     if request.user.is_anonymous:
         return redirect('/login')
+
+    exec_querry("SELECT clean_db()")
+
     with connections['default'].cursor() as cursors:
         cursors.execute(
             f"select * from get_personal_id({request.user.id})")
@@ -321,7 +358,8 @@ def get_comments_by_entryID(entryID, user_id, is_act=False):
 def status(request):
     if(request.user.is_anonymous):
         return redirect('/login')
-    perm = False
+    perm = 0
+    exec_querry("SELECT clean_db()")
     user_id = request.user.id
     with connections['default'].cursor() as cursors:
         cursors.execute(
@@ -446,59 +484,92 @@ def status(request):
     # print(previous_entries, active)
 
     return render(request=request, template_name="status.html", context={'atv': active, 'act_cnt': len(active), 'past': previous_entries, 'past_cnt': len(previous_entries), 'has_permission': perm})
+
+
 def appointment(request):
+    if request.user.is_anonymous:
+        return redirect('/login')
+    exec_querry("SELECT clean_db()")
+    user_id = request.user.id
+    perm = -1
     with connections['default'].cursor() as cursors:
         cursors.execute(
-        f"select * from get_personal_id({2})")
+            f"select * from get_personal_id({user_id})")
         res = cursors.fetchone()
         res = res[0]
-        deaninfo={}
-        deaninfo['position']=posi[1]
-        deaninfo['user_id']=2
-        deaninfo['name']=res['first_name']+" "+res['last_name']  
+        perm = res['permission_level']
+
+    if perm < 1:
+        messages.warning(
+            request, "Error: You don't have permission for that action")
+        return redirect('/profile')
+    # -------------------------------------------------________________________________________________________________________________________---------------------------------------------------------------------------------
+    if request.method == "POST":
+        form = AppointmentForm(request.POST)
+        if form.is_valid():
+            post_pairs = [(2, ""), (1, "CSE"), (1, "EE"), (1, "ME")]
+            (perm_level,
+             has_dept_constraint) = post_pairs[form.cleaned_data['post_id']]
+
+            print(form.cleaned_data)
+
+        else:
+            print(form.errors)
+    # ----------------------------------------------________________##########################_####################------------------------------------------------------------------------------------
     with connections['default'].cursor() as cursors:
         cursors.execute(
-        f"select * from get_personal_id({3})")
+            f"select * from get_personal_id({2})")
         res = cursors.fetchone()
         res = res[0]
-        hodcseinfo={}
-        hodcseinfo['position']=posi[2]
-        hodcseinfo['user_id']=3
-        hodcseinfo['name']=res['first_name']+" "+res['last_name']  
+        deaninfo = {}
+        deaninfo['position'] = posi[1]
+        deaninfo['user_id'] = 2
+        deaninfo['name'] = res['first_name']+" "+res['last_name']
     with connections['default'].cursor() as cursors:
         cursors.execute(
-        f"select * from get_personal_id({4})")
+            f"select * from get_personal_id({3})")
         res = cursors.fetchone()
         res = res[0]
-        hodeeinfo={}
-        hodeeinfo['position']=posi[3]
-        hodeeinfo['user_id']=4
-        hodeeinfo['name']=res['first_name']+" "+res['last_name']  
+        hodcseinfo = {}
+        hodcseinfo['position'] = posi[2]
+        hodcseinfo['user_id'] = 3
+        hodcseinfo['name'] = res['first_name']+" "+res['last_name']
+
     with connections['default'].cursor() as cursors:
         cursors.execute(
-        f"select * from get_personal_id({5})")
+            f"select * from get_personal_id({4})")
         res = cursors.fetchone()
         res = res[0]
-        hodmeinfo={}
-        hodmeinfo['position']=posi[4]
-        hodmeinfo['user_id']=5
-        hodmeinfo['name']=res['first_name']+" "+res['last_name']  
-    
-    mech=[]
+        hodeeinfo = {}
+        hodeeinfo['position'] = posi[3]
+        hodeeinfo['user_id'] = 4
+        hodeeinfo['name'] = res['first_name']+" "+res['last_name']
+
+    with connections['default'].cursor() as cursors:
+        cursors.execute(
+            f"select * from get_personal_id({5})")
+        res = cursors.fetchone()
+        res = res[0]
+        hodmeinfo = {}
+        hodmeinfo['position'] = posi[4]
+        hodmeinfo['user_id'] = 5
+        hodmeinfo['name'] = res['first_name']+" "+res['last_name']
+
+    mech = []
     with connections['default'].cursor() as cursors:
         cursors.execute(f"Select * from get_department_data('ME')")
         result = cursors.fetchall()
-    dean=[]
+    dean = []
     for val in result:
         val = val[0]
         new_val = {}
         new_val['facultyid'] = val['FacultyID']
-        new_val['name']=val['first_name']+" "+val['last_name']
-        new_val['dept']='ME'
+        new_val['name'] = val['first_name']+" "+val['last_name']
+        new_val['dept'] = 'ME'
         mech.append(new_val.copy())
         dean.append(new_val.copy())
 
-    elec=[]
+    elec = []
     with connections['default'].cursor() as cursors:
         cursors.execute(f"Select * from get_department_data('EE')")
         result = cursors.fetchall()
@@ -507,11 +578,11 @@ def appointment(request):
         val = val[0]
         new_val = {}
         new_val['facultyid'] = val['FacultyID']
-        new_val['name']=val['first_name']+" "+val['last_name']
-        new_val['dept']='EE'
+        new_val['name'] = val['first_name']+" "+val['last_name']
+        new_val['dept'] = 'EE'
         elec.append(new_val.copy())
         dean.append(new_val.copy())
-    cse=[]
+    cse = []
     with connections['default'].cursor() as cursors:
         cursors.execute(f"Select * from get_department_data('CSE')")
         result = cursors.fetchall()
@@ -520,8 +591,9 @@ def appointment(request):
         val = val[0]
         new_val = {}
         new_val['facultyid'] = val['FacultyID']
-        new_val['name']=val['first_name']+" "+val['last_name']
-        new_val['dept']='CSE'
+        new_val['name'] = val['first_name']+" "+val['last_name']
+        new_val['dept'] = 'CSE'
         cse.append(new_val.copy())
         dean.append(new_val.copy())
-    return render(request= request, template_name="appointment.html", context={'deaninfo': deaninfo,'hodcseinfo': hodcseinfo,'hodeeinfo': hodeeinfo,'hodmeinfo': hodmeinfo,'Mechanical': mech, 'Electrical': elec, 'computer': cse, 'Dean': dean})
+
+    return render(request=request, template_name="appointment.html", context={'deaninfo': deaninfo, 'hodcseinfo': hodcseinfo, 'hodeeinfo': hodeeinfo, 'hodmeinfo': hodmeinfo, 'Mechanical': mech, 'Electrical': elec, 'computer': cse, 'Dean': dean, 'has_permission': perm})
