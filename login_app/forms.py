@@ -8,10 +8,6 @@ class LoginForm(forms.Form):
     password = forms.CharField(widget=forms.PasswordInput)
     is_cross = forms.BooleanField(initial=False, required=False)
 
-    # class Meta:
-    #     model = User
-    #     fields = ("username", "email", "password1", "password2")
-
 
 class NewApplicationForm(forms.Form):
     startdate = forms.DateField()
@@ -24,3 +20,8 @@ class RequestForm(forms.Form):
     faculty_id = forms.IntegerField()
     verdict = forms.ChoiceField(
         choices=((0, 0), (1, 1,), (2, 2)), widget=forms.RadioSelect)
+
+
+class ResponseForm(forms.Form):
+    comments = forms.CharField(max_length=300)
+    entryid = forms.IntegerField()

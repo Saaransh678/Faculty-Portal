@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from .forms import LoginForm, NewApplicationForm, RequestForm
+from .forms import LoginForm, NewApplicationForm, RequestForm, ResponseForm
 from django.contrib import messages
 from django.http import HttpResponse
 # from login_app.models import Faculty, activeleaveentries
@@ -146,16 +146,21 @@ def requests(request):
         return redirect('/login')
     perm = False
     user = request.user
-    querry = f'SELECT * FROM main_faculty WHERE \"FacultyID\" ={user.id}'
-    res = Faculty.objects.raw(querry)
+    querry = f'SELECT * FROM get_personal_id({user.id})'
+    cursor = connections['default'].cursor()
+    cursor.execute(querry)
+    res = cursor.fetchone()
+    cursor.close()
+    print(res)
+
     for faculty_details in res:
-        perm_level = faculty_details.permission_level
-        perm = bool(faculty_details.permission_level)
-    # perm_level = perm_level-1 -------------------------------------------------------------------------- CHECK
-    if perm_level < 1:
+        perm = faculty_details["permission_level"]
+        depart = faculty_details['dept']
+
+    if perm < 1:
         messages.warning("Error!: You are not authorised for the action.")
         return redirect('/profile')
-    querry = f'select * from get_active_requests({perm_level});'
+    querry = f'select * from get_active_requests({perm}, \'{depart}\');'
     cursor = connections['default'].cursor()
     cursor.execute(querry)
     cur = cursor.fetchall()
@@ -201,7 +206,7 @@ def application(request):
                     request, f"Error: You Already Have an Active Leave Entry with id = {check_res[1][0].id}")
 
             else:
-                now = datetime.today().strftime('%Y-%m-%d')
+                now = datetime.today()
                 insert_querry = f'INSERT INTO "main_active_leave_entries"("FacultyID", application_date, starting_date, num_leaves, curr_status) VALUES({request.user.id}, \'{now}\', \'{st_date}\', {(end_date - st_date).days}, 1)'
                 exec_querry(insert_querry)
 
@@ -247,6 +252,8 @@ def get_comments_by_entryID(entryID, user_id):
 
 
 def status(request):
+    if(request.user.is_anonymous):
+        return redirect('/login')
     perm = False
     with connections['default'].cursor() as cursors:
         cursors.execute(
@@ -254,6 +261,14 @@ def status(request):
         res = cursors.fetchone()
         res = res[0]
         perm = res['permission_level']
+
+    if request.method == "POST":
+        form = ResponseForm(request.POST)
+        if form.is_valid():
+            print(form.cleaned_data)
+
+        else:
+            print(form.errors)
 
     user_id = request.user.id
     active = []
@@ -295,8 +310,6 @@ def status(request):
         comment_details['createdon'] = clean_date(val['timecreated'])
         active[-1]['comms'].append(comment_details.copy())
 
-    # print(active)
-
     previous_entries = []
 
     with connections['default'].cursor() as cursors:
@@ -313,37 +326,45 @@ def status(request):
             new_val['comms'] = []
             new_val['start_date'] = val['starting_date']
             new_val['decision_date'] = val['timecreated']
-            # new_val['was_approved'] = bool(val['verdict']/2)
             new_val['num'] = val['num_leaves']
-            new_val['application_date'] = datetime.strptime(
-                val['timecreated'][:-6], datetime_format)
+            new_val['application_date'] = clean_date(val['timecreated'])
 
             prev = val['EntryID']
             previous_entries.append(new_val.copy())
 
-        previous_entries[-1]['decision_date'] = val['timecreated']
-        previous_entries[-1]['verdict'] = val['verdict']
+        previous_entries[-1]['decision_date'] = clean_date(val['timecreated'])
+        previous_entries[-1]['was_approved'] = bool(val['verdict'])
         comment_details = {}
         deciderID, deciderName = (0, "")
-        with connections['default'].cursor() as cursors:
-            cursors.execute(
-                f"select * from get_personal_id({val['DecisionMakerID']})")
-            res = cursors.fetchone()
-            res = res[0]
-            deciderID = res['FacultyID']
-            deciderName = res['first_name'] + " " + res['last_name']
-            comment_details['from'] = deciderName
 
-        if deciderID == val['ApplicantID'] or val['DecisionMakerID'] == val['ApplicantID']:
-            comment_details['from'] = 'Me'
+        if val['DecisionMakerID'] == -1:
+            comment_details['from'] = 'Default'
         else:
-            comment_details['body'] = val['body']
+            with connections['default'].cursor() as cursors:
+                cursors.execute(
+                    f"select * from get_personal_id({val['DecisionMakerID']})")
+                res = cursors.fetchone()
+                res = res[0]
+                deciderID = res['FacultyID']
+                deciderName = res['first_name'] + " " + res['last_name']
+                comment_details['from'] = deciderName
+
+            if deciderID == val['ApplicantID'] or val['DecisionMakerID'] == val['ApplicantID']:
+                comment_details['from'] = 'Me'
+            else:
+                comment_details['from'] = deciderName
+
+        previous_entries[-1]['decisionBy'] = comment_details['from']
+        comment_details['body'] = val['body']
 
         comment_details['createdon'] = datetime.strptime(
             val['timecreated'][:-6], datetime_format)
         comment_details['body'] = val['body']
+        comment_details['succ'] = bool(val['verdict'] == 2)
+        comment_details['prim'] = bool(val['verdict'] == 1)
+        comment_details['dang'] = bool(val['verdict'] == 0)
         previous_entries[-1]['comms'].append(comment_details.copy())
 
-    print(previous_entries, active)
+    # print(previous_entries, active)
 
     return render(request=request, template_name="status.html", context={'atv': active, 'act_cnt': len(active), 'past': previous_entries, 'past_cnt': len(previous_entries), 'has_permission': perm})

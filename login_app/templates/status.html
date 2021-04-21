@@ -22,7 +22,7 @@
       <!-- <tr class="table-primary"> -->
       <tr class="accordion-toggle table-primary">
         <td class="btn btn-dark" data-bs-toggle="collapse" href="#multiCollapseExampleA{{i.id}}" role="button"
-          aria-expanded="false" aria-controls="multiCollapseExampleA{{i.id}}">Exp</td>
+          aria-expanded="false" aria-controls="multiCollapseExampleA{{i.id}}">Details</td>
         <td>{{i.id}}</td>
         <td>{{i.application_date}}</td>
         <td>{{i.start_date}}</td>
@@ -32,19 +32,35 @@
 
       <tr class="collapse multi-collapse" id="multiCollapseExampleA{{i.id}}">
         <td>
-          <H5>Comments: </H5>
+          <H6>Comments: </H6>
         </td>
 
-        <td colspan="6">
+        <td colspan="4">
           {% for comm in i.comms %}
           <div class="row">
             <div class="col-3">{{comm.createdon}} </div>
             <div class="col-2"><b>{{comm.from}}: </b></div>
-            <div class="col-6">{{comm.body}} </div>
-
+            <div class="col-5">{{comm.body}} </div>
           </div>
           {% endfor %}
         </td>
+
+        {% if i.curr_status == 1 %}
+        <td>
+          <form method="post" class="ResponseForm">
+            {% csrf_token %}
+            <label for="entryid" class="form-label" hidden>entryid</label>
+            <input type="number" name="entryid" value="{{i.id}}" hidden>
+
+            <div class=" mb-3">
+              <label for="comments" class="form-label">Comments</label>
+              <textarea class="form-control" name="comments" style="height: 100px;" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </form>
+        </td>
+        {% endif %}
+
       </tr>
       {% endfor %}
     </tbody>
@@ -76,7 +92,7 @@
       {% for i in past %}
       <tr class="accordion-toggle {% if i.was_approved %} table-success {% else %} table-danger {% endif %}">
         <td class="btn btn-dark" data-bs-toggle="collapse" href="#multiCollapseExample{{i.id}}" role="button"
-          aria-expanded="false" aria-controls="multiCollapseExample{{i.id}}">Exp</td>
+          aria-expanded="false" aria-controls="multiCollapseExample{{i.id}}">Details</td>
         <td>{{i.id}}</td>
         <td>{{i.application_date}}</td>
         <td>{{i.num}}</td>
@@ -93,9 +109,10 @@
         <td colspan="6">
           {% for comm in i.comms %}
           <div class="row">
-            <div class="col-3">{{comm.createdon}} </div>
+            <div class=" col-3">{{comm.createdon}} </div>
             <div class="col-2"><b>{{comm.from}}: </b></div>
-            <div class="col-6">{{comm.body}} </div>
+            <div class="col-5">{{comm.body}} </div>
+            <div class="col-1">{{comm.verdict}} </div>
           </div>
           {% endfor %}
         </td>
