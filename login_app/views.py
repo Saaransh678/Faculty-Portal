@@ -151,6 +151,7 @@ def requests(request):
             for faculty_details in res:
                 entryid = faculty_details.id
                 current_status = faculty_details.curr_status
+                appli_date=faculty_details.application_date
                 start_date = faculty_details.starting_date
                 leaves = faculty_details.num_leaves
             if verdict == '2':
@@ -163,19 +164,29 @@ def requests(request):
                     user_id = res['FacultyID']
                     leave_cnt = res['leaves_remaining']
                 if perm == 0:
-                    if current_status == 1:
-                        insert_record = f"INSERT INTO main_decision_record(\"EntryID\", timecreated, body, verdict, \"DecisionMakerID\", is_active) VALUES({entryid}, '{now}', '{Comment}', 2, '{request.user.id}', False)"
-                        insert_record1 = f"INSERT INTO main_previous_request_record(\"EntryID\", \"ApplicantID\", starting_date, num_leaves, was_approved) VALUES({entryid}, '{Facultyid}',\'{start_date}\','{leaves}' , True)"
-                        delete_record = f"DELETE FROM main_active_leave_entries WHERE id={entryid}"
+                    if appli_date>start_date:
+                        if current_status==3:
+                            insert_record = f"INSERT INTO main_decision_record(\"EntryID\", timecreated, body, verdict, \"DecisionMakerID\", is_active) VALUES({entryid}, '{now}', '{Comment}', 2, '{request.user.id}', False)"
+                            insert_record1 = f"INSERT INTO main_previous_request_record(\"EntryID\", \"ApplicantID\", starting_date, num_leaves, was_approved) VALUES({entryid}, '{Facultyid}',\'{start_date}\','{leaves}' , True)"
+                            delete_record=f"DELETE FROM main_active_leave_entries WHERE id={entryid}"
+                        else:
+                            insert_record = f"INSERT INTO main_decision_record(\"EntryID\", timecreated, body, verdict, \"DecisionMakerID\", is_active) VALUES({entryid}, '{now}', '{Comment}', 2, '{request.user.id}', True)"
+                            update_record=f"UPDATE  main_active_leave_entries SET curr_status={current_status+1} WHERE id={entryid} "
                     else:
-                        insert_record = f"INSERT INTO main_decision_record(\"EntryID\", timecreated, body, verdict, \"DecisionMakerID\", is_active) VALUES({entryid}, '{now}', '{Comment}', 2, '{request.user.id}', True)"
-                        update_record = f"UPDATE  main_active_leave_entries SET curr_status={current_status+1} WHERE id={entryid} "
+                        if current_status==2:
+                            insert_record = f"INSERT INTO main_decision_record(\"EntryID\", timecreated, body, verdict, \"DecisionMakerID\", is_active) VALUES({entryid}, '{now}', '{Comment}', 2, '{request.user.id}', False)"
+                            insert_record1 = f"INSERT INTO main_previous_request_record(\"EntryID\", \"ApplicantID\", starting_date, num_leaves, was_approved) VALUES({entryid}, '{Facultyid}',\'{start_date}\','{leaves}' , True)"
+                            delete_record=f"DELETE FROM main_active_leave_entries WHERE id={entryid}"
+                        else:
+                            insert_record = f"INSERT INTO main_decision_record(\"EntryID\", timecreated, body, verdict, \"DecisionMakerID\", is_active) VALUES({entryid}, '{now}', '{Comment}', 2, '{request.user.id}', True)"
+                            update_record=f"UPDATE  main_active_leave_entries SET curr_status={current_status+1} WHERE id={entryid} "
                 elif perm == 1 or perm == 2:
                     insert_record = f"INSERT INTO main_decision_record(\"EntryID\", timecreated, body, verdict, \"DecisionMakerID\", is_active) VALUES({entryid}, '{now}', '{Comment}', 2, '{request.user.id}', False)"
                     insert_record1 = f"INSERT INTO main_previous_request_record(\"EntryID\", \"ApplicantID\", starting_date, num_leaves, was_approved) VALUES({entryid}, '{Facultyid}',\'{start_date}\','{leaves}' , True)"
                     delete_record = f"DELETE FROM main_active_leave_entries WHERE id={entryid}"
             elif verdict == '1':
                 insert_record = f"INSERT INTO main_decision_record(\"EntryID\", timecreated, body, verdict, \"DecisionMakerID\", is_active) VALUES({entryid}, '{now}', '{Comment}', 1, '{request.user.id}', True)"
+                update_record=f"UPDATE  main_active_leave_entries SET curr_status={0} WHERE id={entryid} "
             elif verdict == '0':
                 insert_record = f"INSERT INTO main_decision_record(\"EntryID\", timecreated, body, verdict, \"DecisionMakerID\", is_active) VALUES({entryid}, '{now}', '{Comment}', 0, '{request.user.id}', False)"
                 insert_record1 = f"INSERT INTO main_previous_request_record(\"EntryID\", \"ApplicantID\", starting_date, num_leaves, was_approved) VALUES({entryid}, '{Facultyid}',\'{start_date}\','{leaves}' , False)"
