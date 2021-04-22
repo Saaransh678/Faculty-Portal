@@ -510,7 +510,28 @@ def appointment(request):
             post_pairs = [(2, ""), (1, "CSE"), (1, "EE"), (1, "ME")]
             (perm_level,
              has_dept_constraint) = post_pairs[form.cleaned_data['post_id']]
-
+            with connections['default'].cursor() as cursors:
+                cursors.execute(
+                f"select * from get_personal_id({form.cleaned_data['post_id']+2})")
+                res = cursors.fetchone()
+                res = res[0]
+                date_joined=res['date_joined']
+                facultyid=res['FacultyID']
+            with connections['default'].cursor() as cursors:
+                cursors.execute(
+                f"select * from get_personal_id({form.cleaned_data['new_fac_id']})")
+                res = cursors.fetchone()
+                res = res[0]
+                first_name=res['first_name']
+                last_name=res['last_name']
+            update1=f"UPDATE auth_user SET first_name='{first_name}' , last_name='{last_name}', date_joined='{datetime.now()}' WHERE id= {form.cleaned_data['post_id']+2}"
+            update2=f"UPDATE main_faculty SET permission_level=0 WHERE  \"FacultyID\"={facultyid}"
+            update3=f"UPDATE main_faculty SET permission_level={perm_level} WHERE  \"FacultyID\"={form.cleaned_data['new_fac_id']}"
+            insert1=f"INSERT INTO main_previous_cross_cutting( \"FacultyID\", timebegin , timeend , permission_level) VALUES({facultyid}, \'{date_joined}\',\'{datetime.now()}\', {perm_level})"
+            exec_querry(update1)
+            exec_querry(update2)
+            exec_querry(update3)
+            exec_querry(insert1)
             print(form.cleaned_data)
 
         else:
