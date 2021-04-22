@@ -64,9 +64,9 @@ SELECT * from clean_active_entries();
  BEGIN
         select permission_level into level from main_Faculty where "FacultyID" = user_id;
         if user_id > 5 then
-            select main_faculty."FacultyID", main_faculty.dept, main_faculty.leaves_remaining, main_faculty.permission_level, auth_user.username, auth_user.email, auth_user.first_name, auth_user.last_name  into personal_details from main_Faculty, auth_user where "FacultyID" = user_id AND user_id = id;
+            select main_faculty."FacultyID", main_faculty.dept, main_faculty.leaves_remaining, main_faculty.permission_level, auth_user.username, auth_user.email, auth_user.first_name, auth_user.last_name, auth_user.date_joined into personal_details from main_Faculty, auth_user where "FacultyID" = user_id AND user_id = id;
         else 
-            select main_faculty."FacultyID", main_faculty.dept, main_faculty.leaves_remaining, main_faculty.permission_level, auth_user.username, auth_user.email, auth_user.first_name, auth_user.last_name  into personal_details from main_Faculty, auth_user where permission_level = level AND "FacultyID" != user_id AND "FacultyID" = id;
+            select main_faculty."FacultyID", main_faculty.dept, main_faculty.leaves_remaining, main_faculty.permission_level, auth_user.username, auth_user.email, auth_user.first_name, auth_user.last_name, auth_user.date_joined into personal_details from main_Faculty, auth_user where permission_level = level AND "FacultyID" != user_id AND "FacultyID" = id;
         end if;
  		return row_to_json(personal_details);
 
@@ -142,3 +142,19 @@ for rec in
 END;
 $$ LANGUAGE 'plpgsql';
 ----------------------
+CREATE OR REPLACE FUNCTION get_department_date(de character varying(8))
+RETURNS SETOF JSON AS $$
+Declare
+ rec record;
+BEGIN
+for rec in
+	select * 
+	from auth_user, main_faculty 
+	where id="FacultyID" and id>5 and dept=de and permission_level=0 order by id
+    loop
+        return next row_to_json(rec);
+    end loop;
+    
+END;
+$$ LANGUAGE 'plpgsql';
+-----------------------
