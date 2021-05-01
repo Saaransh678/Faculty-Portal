@@ -86,10 +86,6 @@ def login_req(request):
                 username = form.cleaned_data['username']
                 password = form.cleaned_data['password']
 
-                # if form.cleaned_data['is_cross'] == True:
-                #     # Special Permissions Processing
-                #     print("Super")
-
                 user = authenticate(username=username, password=password)
 
                 if user is not None:
@@ -211,7 +207,6 @@ def requests(request):
                             insert_record = f"INSERT INTO main_decision_record(\"EntryID\", timecreated, body, verdict, \"DecisionMakerID\", is_active) VALUES({entryid}, '{now}', '{Comment}', 2, '{request.user.id}', True)"
                             update_record = f"UPDATE  main_active_leave_entries SET curr_status={current_status+1} WHERE id={entryid} "
                 elif perm == 1 or perm == 2:
-                    update_leaves = f"UPDATE main_faculty SET leaves_remaining = {leave_cnt - leaves} where \"FacultyID\"= {Facultyid}"
                     insert_record = f"INSERT INTO main_decision_record(\"EntryID\", timecreated, body, verdict, \"DecisionMakerID\", is_active) VALUES({entryid}, '{now}', '{Comment}', 2, '{request.user.id}', False)"
                     insert_record1 = f"INSERT INTO main_previous_request_record(\"EntryID\", \"ApplicantID\", starting_date, num_leaves, was_approved) VALUES({entryid}, '{Facultyid}',\'{start_date}\','{leaves}' , True)"
                     update_record1 = f"UPDATE main_decision_record SET is_active = false where \"EntryID\" = {entryid}"
@@ -220,7 +215,7 @@ def requests(request):
                 insert_record = f"INSERT INTO main_decision_record(\"EntryID\", timecreated, body, verdict, \"DecisionMakerID\", is_active) VALUES({entryid}, '{now}', '{Comment}', 1, '{request.user.id}', True)"
                 update_record = f"UPDATE  main_active_leave_entries SET curr_status={0} WHERE id={entryid} "
             elif verdict == '0':
-                update_leaves = f"UPDATE main_faculty SET leaves_remaining = {leave_cnt - leaves} where \"FacultyID\"= {Facultyid}"
+                # update_leaves = f"UPDATE main_faculty SET leaves_remaining = {leave_cnt - leaves} where \"FacultyID\"= {Facultyid}"
                 insert_record = f"INSERT INTO main_decision_record(\"EntryID\", timecreated, body, verdict, \"DecisionMakerID\", is_active) VALUES({entryid}, '{now}', '{Comment}', 0, '{request.user.id}', False)"
                 insert_record1 = f"INSERT INTO main_previous_request_record(\"EntryID\", \"ApplicantID\", starting_date, num_leaves, was_approved) VALUES({entryid}, '{Facultyid}',\'{start_date}\','{leaves}' , False)"
                 delete_record = f"DELETE FROM main_active_leave_entries WHERE id={entryid}"
@@ -308,11 +303,11 @@ def application(request):
                     request, f"Error: You Already Have an Active Leave Entry with id = {check_res[1][0].id}")
 
             else:
-                insert_querry = f'INSERT INTO "main_active_leave_entries"("FacultyID", application_date, starting_date, num_leaves, curr_status) VALUES({request.user.id}, \'{datetime.today()}\', \'{st_date}\', {(end_date - st_date).days}, 1)'
+                insert_querry = f'INSERT INTO "main_active_leave_entries"("FacultyID", application_date, starting_date, num_leaves, curr_status) VALUES({user_id}, \'{datetime.today()}\', \'{st_date}\', {(end_date - st_date).days}, {perm+1})'
                 exec_querry(insert_querry)
 
                 check_res = get_active_leaves(user_id)
-                insert_record = f"INSERT INTO main_decision_record(\"EntryID\", timecreated, body, verdict, \"DecisionMakerID\", is_active) VALUES({check_res[1][0].id}, '{datetime.now()}', '{desc}', -1, '{request.user.id}', True)"
+                insert_record = f"INSERT INTO main_decision_record(\"EntryID\", timecreated, body, verdict, \"DecisionMakerID\", is_active) VALUES({check_res[1][0].id}, '{datetime.now()}', '{desc}', -1, '{user_id}', True)"
                 exec_querry(insert_record)
 
                 messages.success(
@@ -512,22 +507,22 @@ def appointment(request):
              has_dept_constraint) = post_pairs[form.cleaned_data['post_id']]
             with connections['default'].cursor() as cursors:
                 cursors.execute(
-                f"select * from get_personal_id({form.cleaned_data['post_id']+2})")
+                    f"select * from get_personal_id({form.cleaned_data['post_id']+2})")
                 res = cursors.fetchone()
                 res = res[0]
-                date_joined=res['date_joined']
-                facultyid=res['FacultyID']
+                date_joined = res['date_joined']
+                facultyid = res['FacultyID']
             with connections['default'].cursor() as cursors:
                 cursors.execute(
-                f"select * from get_personal_id({form.cleaned_data['new_fac_id']})")
+                    f"select * from get_personal_id({form.cleaned_data['new_fac_id']})")
                 res = cursors.fetchone()
                 res = res[0]
-                first_name=res['first_name']
-                last_name=res['last_name']
-            update1=f"UPDATE auth_user SET first_name='{first_name}' , last_name='{last_name}', date_joined='{datetime.now()}' WHERE id= {form.cleaned_data['post_id']+2}"
-            update2=f"UPDATE main_faculty SET permission_level=0 WHERE  \"FacultyID\"={facultyid}"
-            update3=f"UPDATE main_faculty SET permission_level={perm_level} WHERE  \"FacultyID\"={form.cleaned_data['new_fac_id']}"
-            insert1=f"INSERT INTO main_previous_cross_cutting( \"FacultyID\", timebegin , timeend , permission_level) VALUES({facultyid}, \'{date_joined}\',\'{datetime.now()}\', {perm_level})"
+                first_name = res['first_name']
+                last_name = res['last_name']
+            update1 = f"UPDATE auth_user SET first_name='{first_name}' , last_name='{last_name}', date_joined='{datetime.now()}' WHERE id= {form.cleaned_data['post_id']+2}"
+            update2 = f"UPDATE main_faculty SET permission_level=0 WHERE  \"FacultyID\"={facultyid}"
+            update3 = f"UPDATE main_faculty SET permission_level={perm_level} WHERE  \"FacultyID\"={form.cleaned_data['new_fac_id']}"
+            insert1 = f"INSERT INTO main_previous_cross_cutting( \"FacultyID\", timebegin , timeend , permission_level) VALUES({facultyid}, \'{date_joined}\',\'{datetime.now()}\', {perm_level})"
             exec_querry(update1)
             exec_querry(update2)
             exec_querry(update3)

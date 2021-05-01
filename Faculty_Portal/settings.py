@@ -102,7 +102,15 @@ DATABASES = {
         'NAME': 'df18p9b979dcgn',
         'USER': 'hmnwhxrriwyzhj',
         'PASSWORD': 'c02d3ad87980b500a64b491ec4287e3c3dc307aa3aca45762759de25b93d2f51',
-    }
+    },
+    # 'mongo_d': {
+    #     'ENGINE': 'djongo',
+    #     'HOST': 'mongodb+srv://admin_0:pass1234@cluster0.2449b.mongodb.net/myFirstDatabase?retryWrites=true&w=majority',
+    #     'PORT': '5432',
+    #     'NAME': 'dbms',
+    #     'USER': 'admin_0',
+    #     'PASSWORD': 'pass1234',
+    # }
     # 'default': {
     #     'ENGINE': 'django.db.backends.postgresql_psycopg2',
     #     'HOST': 'queenie.db.elephantsql.com',
