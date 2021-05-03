@@ -47,10 +47,10 @@ def set_pass(request):
     # passwords = ['ruZIze93l3', '58FeMvtFRP', 'VJWrluHjUx', 'lQvWLY47iw', 'DOROHtTB2M', 'ENxZgsML5J', 'sQE4HtaLN1', 'l8hTn79A4e', 'KOkFaEyVWo', 'UmBDatAwpd', '4gEcLxfoLx', 'gsr56632aj',
     #              '748qkBy7Kn', 'zOT4EhzRD4', '1SIyhcIbJu', 'dxpVL9awVG', 'V89xtrgR0X', 'Js1nIzSwOl', 'ClYKUC9nwZ', 'T8QvqH3zXg', 'wOWUr750Cl', 's7IdGxZhaw', 'XN70Xhwo8A', 'P2mBCOi1zV', 'TAnrcEjrlj']
     passwords = ['dnX48G4hSj', 'lldKDgAZO6', 'h41D7RF6t9', 'NtqjtNkqVR', 'NomUtfbAUu', 'm1kxmGUQFh', 'qm9oiPKCIx', 'D1baeB7BCX', 'TuEfJELEma', 'J0H2BIv7oz', 'SbkW6Inore', 'VZS2Q9rZUK',
-                 'lNrSvd4MzX', 'HVOOjSV1aZ', 'Hv0FOEWsqV', '14MJwRwuFp', 'V2OUud1xMT', 'aDJ6IWPr6z', 'gddRaqLT4V', 'E6zNeDEWks', 'eedwX9shQZ', '1KF18PUQ6n', '5o60bNiWbP', '8qYuR4LVZP', 'dB3qeY2Fmj', ]
+                 'lNrSvd4MzX', 'HVOOjSV1aZ', 'Hv0FOEWsqV', '14MJwRwuFp', 'V2OUud1xMT', 'aDJ6IWPr6z', 'gddRaqLT4V', 'E6zNeDEWks', 'eedwX9shQZ', '1KF18PUQ6n', '5o60bNiWbP', '8qYuR4LVZP', 'dB3qeY2Fmj']
 
     usernames = ['director', 'dean_aa', 'hod_cse', 'hod_ee', 'hod_me', 'JQHyfvOfvr', 'D8g3iRMLyJ', 'vHr67qPsx1', 'nRidm5may1', 'Z7wLQnbctM', 'JnKITDyjFC', 'zhGNmvwDFC', 'Y6USVuUTsp',
-                 'tHxJO0JKtR', 'U15xCM5sSK', 'cDc9tcNr2U', 'gluxCLBZKD', '9EyUQIJ6R9', 'hiS9cpNL3X', 'fIFZfKPKVy', 'B7tSQgSjGz', 'b3CmGnAUdb', 'O8rGCrgna1', 'hHHdHbKQRY', 'F5Z1bDK78W', ]
+                 'tHxJO0JKtR', 'U15xCM5sSK', 'cDc9tcNr2U', 'gluxCLBZKD', '9EyUQIJ6R9', 'hiS9cpNL3X', 'fIFZfKPKVy', 'B7tSQgSjGz', 'b3CmGnAUdb', 'O8rGCrgna1', 'hHHdHbKQRY', 'F5Z1bDK78W']
 
     for i in range(len(user_ids)):
         user_id, password = (usernames[i], passwords[i])
