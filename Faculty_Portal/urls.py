@@ -30,7 +30,8 @@ from django.db import connections
 
 
 def sample_funct(request):
-    all_fields = Previous_Record._meta.fields
+    # all_fields = Previous_Record._meta.fields
+    all_fields = ""
     string = ""
     for val in all_fields:
         string += str(val).split(".")[-1] + ", "

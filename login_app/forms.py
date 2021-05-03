@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from splitjson.widgets import SplitJSONWidget
 
 
 class LoginForm(forms.Form):
@@ -33,3 +34,22 @@ class AppointmentForm(forms.Form):
     # f_name = forms.CharField()
     # s_name = forms.CharField()
     # dept = forms.CharField()
+
+
+class ProfileChangeForm(forms.Form):
+    fac_id = forms.IntegerField()
+    background = forms.CharField(max_length=350)
+
+    def __init__(self, *args, **kwargs):
+        courses = kwargs.pop('courses')
+        publications = kwargs.pop('pubs')
+        super(ProfileChangeForm, self).__init__(*args, **kwargs)
+        counter = 1
+        for c in courses:
+            self.fields['course-' + str(counter)] = forms.CharField()
+            counter += 1
+
+        counter = 1
+        for pub in publications:
+            self.fields['publication-' + str(counter)] = forms.JSONField()
+            counter += 1
