@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {% extends 'logined.html' %}
 
 {% block content %}
@@ -115,7 +116,7 @@
     </div>
     <div class="tab-pane fade" id="pills-settings" role="tabpanel" aria-labelledby="pills-settings-tab">
       <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal3" style="margin: 10px 0px 10px 0px;">
-        Add Courses
+        Add Course
       </button>
 
       <!-- Modal -->
@@ -127,15 +128,15 @@
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-              <form>
+              <form action = "#" method= "POST" class= "NewCourseForm">
                 <div class="mb-3">
-                  <label for="exampleInputcoursename1" class="form-label">Course Name</label>
-                  <input type="name" class="form-control" id="exampleInputcoursename1" aria-describedby="emailHelp">
+                  <label for="" class="form-label">Course Name</label>
+                  <input type="name" class="form-control" id="exampleInputcoursename1">
 
                 </div>
                 <div class="mb-3">
-                  <label for="exampleInputcourseid1" class="form-label">Course ID</label>
-                  <input type="name" class="form-control" id="exampleInputcourseid1" aria-describedby="emailHelp">
+                  <label for="exampleInputcourseid1" class="code">Course Code</label>
+                  <input type="name" class="form-control" name = "code"id="exampleInputcourseid1">
 
                 </div>
                 <button type="submit" class="btn btn-primary">Submit</button>
@@ -172,7 +173,173 @@
     </div>
   </div>
   
-</td>
+=======
+{% extends 'logined.html' %}
+
+{% block content %}
+
+<ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active" id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#pills-home" type="button" role="tab" aria-controls="pills-home" aria-selected="true" style="margin: 10px 0px 10px 0px;">Home</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile" aria-selected="false" style="margin: 10px 0px 10px 0px;">Profile</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="pills-messages-tab" data-bs-toggle="pill" data-bs-target="#pills-messages" type="button" role="tab" aria-controls="pills-messages" aria-selected="false" style="margin: 10px 0px 10px 0px;">Publications</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="pills-settings-tab" data-bs-toggle="pill" data-bs-target="#pills-settings" type="button" role="tab" aria-controls="pills-settings" aria-selected="false" style="margin: 10px 0px 10px 0px;">Courses</button>
+  </li>
+</ul>
+<div class="tab-content" id="pills-tabContent">
+    <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
+ 
+      {% block content1 %}{%endblock %}
+    </div>
+    <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal1" style="margin: 10px 0px 10px 0px;">
+        Add or edit
+      </button>
+
+      <!-- Modal -->
+      <div class="modal fade" id="exampleModal1" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Background</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form>
+                <div class="mb-3">
+                  <label for="exampleFormControlTextarea1" class="form-label">Type here...</label>
+                  <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p>Dr. Dhiraj K. Mahajan joined IIT Ropar as Assistant Professor in December 2013. Prior to this, he was a post-doctoral researcher at ICAMS (Interdisciplinary Centre for A</p>
+    </div>
+    <div class="tab-pane fade" id="pills-messages" role="tabpanel" aria-labelledby="pills-messages-tab">
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal2" style="margin: 10px 0px 10px 0px;">
+        Add Publications
+      </button>
+
+      <!-- Modal -->
+      <div class="modal fade" id="exampleModal2" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Publication</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form>
+                <div class="mb-3">
+                  <label for="exampleFormControlTextarea1" class="form-label">Authors</label>
+                  <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+                </div>
+                <div class="mb-3">
+                  <label for="exampleFormControlTextarea1" class="form-label">Name of the Journal</label>
+                  <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+                </div>
+                <div class="mb-3">
+                  <label for="startdate" class="form-label">Year</label>
+                  <input class="date-own form-control" style="width: 300px;" type="text">
+                </div>
+
+                <button type="submit" class="btn btn-primary">Submit</button>
+              </form>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      <table class="table">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Authors</th>
+      <th scope="col">Name of the Journal</th>
+      <th scope="col">Year</th>
+      <th scope="col">Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">1</th>
+      <td> <input type="name" class="form-control" placeholder="Authors" aria-label="Authors"></td>
+      <td> <input type="name" class="form-control" placeholder="journal_name" aria-label="jourmal_name"></td>
+      <td> <input type="name" class="form-control" placeholder="year" aria-label="year"></td>
+     <td> <button type="button" class="btn btn-success">Edit</button>
+<button type="button" class="btn btn-danger">Delete</button></td>
+    </tr>
+  
+   
+  </tbody>
+</table>
+    </div>
+    <div class="tab-pane fade" id="pills-settings" role="tabpanel" aria-labelledby="pills-settings-tab">
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal3" style="margin: 10px 0px 10px 0px;">
+        Add Courses
+      </button>
+
+      <!-- Modal -->
+      <div class="modal fade" id="exampleModal3" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Courses</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form>
+                <div class="mb-3">
+                  <label for="exampleInputcoursename1" class="form-label">Course Name</label>
+                  <input type="name" class="form-control" id="exampleInputcoursename1" aria-describedby="emailHelp">
+
+                </div>
+                <div class="mb-3">
+                  <label for="exampleInputcourseid1" class="form-label">Course ID</label>
+                  <input type="name" class="form-control" id="exampleInputcourseid1" aria-describedby="emailHelp">
+
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+              </form>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      <table class="table">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">CourseID</th>
+      <th scope="col">Course-Name</th>
+      <th scope="col">Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">2</th>
+      <td>  <input type="name" class="form-control" placeholder="coureid" aria-label="CourseID"></td>
+      <td> <input type="name" class="form-control" placeholder="CourseName" aria-label="CourseName"></td>
+      <td><button type="button" class="btn btn-success">Edit</button>
+<button type="button" class="btn btn-danger">Delete</button></td>
+    </tr>
+  
+  </tbody>
+</table>
+    </div>
+  </div>
+  
+>>>>>>> d9129cc6d6de13714e4b13158c4a1ff450169546
+/td>
   
     </tr>
     <tr>
