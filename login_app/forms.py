@@ -31,33 +31,18 @@ class ResponseForm(forms.Form):
 class AppointmentForm(forms.Form):
     post_id = forms.IntegerField()
     new_fac_id = forms.IntegerField()
-    # f_name = forms.CharField()
-    # s_name = forms.CharField()
-    # dept = forms.CharField()
 
 
 class NewCourseForm(forms.Form):
-    code = forms.CharField(max_length=10)
-    name = forms.CharField(max_length = 100)
+    course_code = forms.CharField(max_length=10)
+    course_name = forms.CharField(max_length=100)
 
 
+class NewPublicationForm(forms.Form):
+    authors = forms.CharField(max_length=300)
+    journal_name = forms.CharField(max_length=300)
+    year = forms.IntegerField()
 
 
-
-class ProfileChangeForm(forms.Form):
-    # fac_id = forms.IntegerField()
-    # background = forms.CharField(max_length=350)
-    json = forms.JSONField()
-    # def __init__(self, *args, **kwargs):
-    #     courses = kwargs.pop('courses')
-    #     publications = kwargs.pop('pubs')
-    #     super(ProfileChangeForm, self).__init__(*args, **kwargs)
-    #     counter = 1
-    #     for c in courses:
-    #         self.fields['course-' + str(counter)] = forms.CharField()
-    #         counter += 1
-
-    #     counter = 1
-    #     for pub in publications:
-    #         self.fields['publication-' + str(counter)] = forms.JSONField()
-    #         counter += 1
+class bgform(forms.Form):
+    desc = forms.CharField(max_length=400)

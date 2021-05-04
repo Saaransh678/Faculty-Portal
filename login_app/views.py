@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from .forms import LoginForm, NewApplicationForm, RequestForm, ResponseForm, AppointmentForm, ProfileChangeForm, NewCourseForm
+from .forms import LoginForm, NewApplicationForm, RequestForm, ResponseForm, AppointmentForm, NewCourseForm, NewPublicationForm, bgform
 from django.contrib import messages
 from django.http import HttpResponse
 # from login_app.models import Faculty, activeleaveentries
@@ -9,6 +9,7 @@ from main.models import Faculty, Active_Leave_Entries, Previous_Request_Record, 
 # Comments, Previous_Record
 from datetime import datetime
 from django.db import connections
+from pymongo import MongoClient
 # Create your views here.
 
 departments = {'EE': 'Electrical',
@@ -78,12 +79,18 @@ def getBaseDetails(user_id):
     return res[0]
 
 
+def mongoconnect():
+    client = MongoClient(
+        'mongodb+srv://admin_0:pass1234@cluster0.2449b.mongodb.net/dbms?retryWrites=true&w=majority')
+    return (client, client.dbms.Data)
+
+
 def index(request):
     # print(request.user)
     if request.user.is_anonymous:
         return redirect('/login')
 
-    return redirect('/profile')
+    return redirect(f'/profile/id={request.user.id}')
 
 
 def login_req(request):
@@ -101,7 +108,7 @@ def login_req(request):
                     messages.success(
                         request, f"Welcome back, {user.first_name}!!")
                     login(request, user)
-                    return redirect("/profile")
+                    return redirect(f'/profile/id={request.user.id}')
 
                 else:
                     messages.error(
@@ -112,7 +119,7 @@ def login_req(request):
                 messages.error(
                     request, "Unexpected Error!! Try Refreshing the page")
     else:
-        return redirect('/profile')
+        return redirect(f'/profile/id={request.user.id}')
 
     return render(request=request, template_name="loginpage.html")
 
@@ -122,33 +129,93 @@ def logoutuser(request):
     return redirect("/login")
 
 
-def profile(request):
+def profile(request, req_id):
+    (conn, collection) = mongoconnect()
+
     if request.user.is_anonymous:
-        return redirect('/login')
+        requester_id = -1
+    else:
+        requester_id = getBaseDetails(request.user.id)["FacultyID"]
 
-    if request.method == "POST":
-        course_form = NewCourseForm()
-        if course_form.is_valid():
-            print(course_form.cleaned_data)
-        else:
-            print(form.errors)
-    exec_querry("SELECT clean_db()")
-
-    user = request.user
-    faculty_details = getBaseDetails(user.id)
-    fullname = user.first_name + " " + user.last_name
-
+    faculty_details = getBaseDetails(req_id)
+    fullname = faculty_details['first_name'] + \
+        " " + faculty_details['last_name']
+    user_id = faculty_details["FacultyID"]
     context_dict = {}
-    context_dict['email'] = user.email
+    context_dict['email'] = faculty_details['email']
     context_dict['name'] = fullname
-    context_dict['uname'] = user.username
-    # context_dict['has_perm'] = 0
+    context_dict['uname'] = faculty_details['username']
     context_dict['dept'] = departments[faculty_details['dept']] + \
         " Department"
     context_dict['rem_leave'] = faculty_details['leaves_remaining']
     context_dict['perm'] = levels[faculty_details['permission_level']]
     context_dict['has_permission'] = faculty_details['permission_level']
 
+    context_dict['editor'] = (requester_id == user_id)
+
+    profile_data = collection.find_one({'fac_id': user_id})
+
+    if profile_data == None:
+        context_dict['background'] = context_dict['publications'] = context_dict['courses'] = None
+    else:
+        fields = ['background', 'publications', 'courses']
+        for val in fields:
+            if val in profile_data:
+                context_dict[val] = profile_data[val]
+                print(context_dict[val])
+            else:
+                context_dict[val] = None
+
+    if request.method == "POST":
+        updates = {}
+        course_form = NewCourseForm(request.POST)
+        if course_form.is_valid():
+            res = collection.find_one({'fac_id': user_id, 'courses': {
+                                      '$elemMatch': {'$gt': course_form.cleaned_data['course_code']}
+                                      }})
+
+            if res == None:
+                updates["$push"] = {}
+                updates["$push"]['courses'] = {
+                    'code': course_form.cleaned_data['course_code'],
+                    'name': course_form.cleaned_data['course_name']
+                }
+
+            else:
+                messages.error(
+                    request, f"You already have an course with Course Code: {course_form.cleaned_data['course_code']}")
+
+        pub_form = NewPublicationForm(request.POST)
+        if pub_form.is_valid():
+            res = collection.find_one({'fac_id': user_id, 'publications': {
+                                      '$elemMatch': {'$gt': pub_form.cleaned_data['journal_name']}
+                                      }})
+            if res == None:
+                if "$push" not in updates:
+                    updates["$push"] = {}
+
+                updates["$push"]['publications'] = {
+                    'name': pub_form.cleaned_data['journal_name'],
+                    'authors': pub_form.cleaned_data['authors'],
+                    'year': pub_form.cleaned_data['year']
+                }
+
+            else:
+                messages.error(
+                    request, f"You already have a publication with Title {course_form.cleaned_data['journal_name']}")
+        backgrnd = bgform(request.POST)
+        if backgrnd.is_valid():
+            updates['$set'] = {'background': backgrnd.cleaned_data['desc']}
+
+        else:
+            print(backgrnd.errors)
+
+        collection.update(
+            {'fac_id': user_id},
+            updates,
+            upsert=True
+        )
+    conn.close
     return render(request=request, template_name="profile.html", context=context_dict)
 
 
@@ -168,7 +235,7 @@ def requests(request):
     if perm_level < 1:
         messages.warning(
             request, "Error!: You are not authorised for the action.")
-        return redirect('/profile')
+        return redirect(f'/profile?id={user_id}')
 
     exec_querry("SELECT clean_db()")
     if request.method == "POST":
@@ -488,18 +555,18 @@ def appointment(request):
         res = cursors.fetchone()
         res = res[0]
         perm = res['permission_level']
+        user_id = res['FacultyID']
 
     if perm < 1:
         messages.warning(
             request, "Error: You don't have permission for that action")
-        return redirect('/profile')
+        return redirect(f'/profile?id={user_id}')
     # -------------------------------------------------________________________________________________________________________________________---------------------------------------------------------------------------------
     if request.method == "POST":
         form = AppointmentForm(request.POST)
         if form.is_valid():
-            post_pairs = [(2, ""), (1, "CSE"), (1, "EE"), (1, "ME")]
-            (perm_level,
-             has_dept_constraint) = post_pairs[form.cleaned_data['post_id']]
+            posts = [2, 1, 1, 1]
+            perm_level = posts[form.cleaned_data['post_id']]
             with connections['default'].cursor() as cursors:
                 cursors.execute(
                     f"select * from get_personal_id({form.cleaned_data['post_id']+2})")
