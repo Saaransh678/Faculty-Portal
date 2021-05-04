@@ -126,8 +126,7 @@ def profile(request):
     if request.user.is_anonymous:
         return redirect('/login')
 
-
-    if request.method == POST:
+    if request.method == "POST":
         course_form = NewCourseForm()
         if course_form.is_valid():
             print(course_form.cleaned_data)
