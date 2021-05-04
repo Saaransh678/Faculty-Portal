@@ -2,9 +2,10 @@ from django.contrib import admin
 from django.urls import path
 from django.urls import path, include
 from . import views
-
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from pymongo import MongoClient
+from .forms import ProfileChangeForm
 
 
 def mongo_funct(request):
@@ -27,16 +28,17 @@ def url_par(request, id):
     return HttpResponse(str(outp_ob))
 
 
-# var elements = document.getElementsByClassName("classname");
-
-# var myFunction = function() {
-# var attribute = this.getAttribute("data-myattribute");
-# alert(attribute);
-# };
-
-# for (var i = 0; i < elements.length; i++) {
-# elements[i].addEventListener('click', myFunction, false);
-# }
+def tryJson(request):
+    if request.method == "POST":
+        form = ProfileChangeForm(request.POST)
+        if form.is_valid():
+            print(form.cleaned_data)
+            print(form.cleaned_data['json'])
+            print(form.cleaned_data['json']['a'])
+        else:
+            print(form.errors)
+    new_form = ProfileChangeForm()
+    return render(request=request, template_name="trial.html", context={"form": new_form})
 
 
 urlpatterns = [
@@ -50,5 +52,6 @@ urlpatterns = [
     path('status/', views.status, name="status"),
     path('requests/', views.requests, name="requests"),
     path('appointment/', views.appointment, name="appointment"),
-    path('mongo_sample/', mongo_funct, name="sample_retreive_mogno"),
+    path('mongo_sample/', mongo_funct, name="sample_retreive_mongo"),
+    path('trial/', tryJson),
 ]
