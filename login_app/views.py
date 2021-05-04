@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from .forms import LoginForm, NewApplicationForm, RequestForm, ResponseForm, AppointmentForm, ProfileChangeForm
+from .forms import LoginForm, NewApplicationForm, RequestForm, ResponseForm, AppointmentForm, ProfileChangeForm, NewCourseForm
 from django.contrib import messages
 from django.http import HttpResponse
 # from login_app.models import Faculty, activeleaveentries
@@ -125,6 +125,14 @@ def logoutuser(request):
 def profile(request):
     if request.user.is_anonymous:
         return redirect('/login')
+
+
+    if request.method == POST:
+        course_form = NewCourseForm()
+        if course_form.is_valid():
+            print(course_form.cleaned_data)
+        else:
+            print(form.errors)
     exec_querry("SELECT clean_db()")
 
     user = request.user

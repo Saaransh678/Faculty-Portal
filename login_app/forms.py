@@ -36,6 +36,14 @@ class AppointmentForm(forms.Form):
     # dept = forms.CharField()
 
 
+class NewCourseForm(forms.Form):
+    code = forms.CharField(max_length=10)
+    name = forms.CharField(max_length = 100)
+
+
+
+
+
 class ProfileChangeForm(forms.Form):
     # fac_id = forms.IntegerField()
     # background = forms.CharField(max_length=350)
