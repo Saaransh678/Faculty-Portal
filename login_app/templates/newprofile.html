@@ -30,9 +30,8 @@
   </div>
   <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
     {% if editor %}
-    <button type="button" class="btn btn-primary" style="margin: 10px 0px 10px 0px;">
-      Add or edit
-    </button>
+    <button type="button" class="btn btn-primary" style="margin: 10px 0px 10px 0px;"
+      onclick="makeeditable(this.parentNode, '')">Edit</button>
     {% endif %}
 
     <!-- Modal -->
@@ -61,7 +60,7 @@
         <label for="desc"></label>
         <textarea name="desc" class="form-control" rows="3" readonly>{{background}}</textarea>
       </div>
-      <button type="submit" class="btn btn-primary">Submit</button>
+      <button type="submit" class="btn btn-primary" hidden>Submit</button>
     </form>
 
   </div>
@@ -103,6 +102,30 @@
         </div>
       </div>
     </div>
+
+    <form class="PublicationForm" method="post" id="pub-form" hidden>
+      {% csrf_token %}
+      <label for="authors" hidden> </label>
+      <input type="name" id="pub-form-authors" name="authors" readonly required>
+
+      <label for="journ_name" hidden> </label>
+      <input type="name" class="form-control" placeholder="journal_name" aria-label="jourmal_name" name="journ_name"
+        id="pub-form-journ_name" readonly required>
+
+      <label for="year" hidden> </label>
+      <input type="name" class="form-control" readonly required name="year" id="pub-form-year">
+
+
+      <label for="is_delete" hidden> </label>
+      <input type="number" class="form-control" name="is_delete" id="pub-form-is_delete" readonly required>
+
+
+      <label for="pub_id" hidden> </label>
+      <input type="name" class="form-control" name="pub_id" id="pub-form-pub_id" readonly required>
+
+      <button type="submit" class="btn btn-primary" id="pub-form-submit">Submit</button>
+    </form>
+    {% if publications %}
     <table class="table">
       <thead>
         <tr>
@@ -115,27 +138,41 @@
       </thead>
       <tbody>
         {% for p in publications %}
-        <tr id="pub-{{p.title}}">
-          <th scope="row">1</th>
-          <td> <input type="name" class="form-control" placeholder="Authors" aria-label="Authors" value={{p.authors}}
-              readonly>
+        <tr id="{{p.id}}">
+          <th scope="row">{{p.num}}</th>
+          <td>
+            <input type="name" class="form-control" placeholder="Authors" aria-label="Authors" name="authors"
+              value="{{p.authors}}" readonly required>
           </td>
-          <td> <input type="name" class="form-control" placeholder="journal_name" aria-label="jourmal_name"
-              value={{p.name}} readonly></td>
-          <td> <input type="name" class="form-control" placeholder="year" aria-label="year" value={{p.year}} readonly>
+          <td>
+            <input type="name" class="form-control" placeholder="journal_name" aria-label="jourmal_name"
+              value="{{p.name}}" name="journ_name" readonly required>
           </td>
+          <td>
+            <input type="name" class="form-control" placeholder="year" aria-label="year" value={{p.year}} name="year"
+              readonly required>
+          </td>
+
+          <td hidden>
+            <input type="name" class="form-control" value="{{p.id}}" name="pub_id" readonly required>
+          </td>
+
           {% if editor %}
           <td>
-            <button type="button" class="btn btn-success">Edit</button>
-            <button type="button" class="btn btn-danger">Delete</button>
+            <button type="button" class="btn btn-success"
+              onclick="makeeditable(this.parentElement.parentElement, 'pub-form')">Edit</button>
+            <button type="button" class="btn btn-danger"
+              onclick='this.disabled = true; this.value = "sending";formCompile(this.parentNode.parentNode, 1, "pub-form")'>Delete</button>
           </td>
           {% endif %}
+
         </tr>
         {% endfor %}
 
 
       </tbody>
     </table>
+    {% endif %}
   </div>
   <div class="tab-pane fade" id="pills-settings" role="tabpanel" aria-labelledby="pills-settings-tab">
     {% if editor %}
@@ -175,6 +212,23 @@
         </div>
       </div>
     </div>
+    <form class="CoursesForm" id="course-form" method="post" hidden>
+      {% csrf_token %}
+      <label for="c_name"></label>
+      <input type="text" name="c_name" id="course-form-course_name">
+
+      <label for="c_code"></label>
+      <input type="text" name="c_code" id="course-form-course_code">
+
+      <label for="c_id"></label>
+      <input type="text" name="c_id" id="course-form-c_id">
+
+      <label for="is_delete"></label>
+      <input type="text" name="is_delete" id="course-form-is_delete">
+
+      <button type="submit" class="btn btn-primary" id="course-form-submit">Submit</button>
+    </form>
+
     <table class="table">
       <thead>
         <tr>
@@ -184,16 +238,30 @@
         </tr>
       </thead>
       <tbody>
-        {% for c in courses%}
+        {% for c in courses %}
         <tr>
-          <th scope="row">2</th>
-          <td> <input type="name" class="form-control" placeholder="Course Code" aria-label="CourseCode" readonly
-              value={{c.code}}></td>
-          <td> <input type="name" class="form-control" placeholder="Course Name" aria-label="CourseName" readonly
-              value={{c.name}}></td>
+          <th scope="row">{{c.num}}</th>
+          <td>
+            <input type="name" class="form-control" placeholder="Course Code" aria-label="CourseCode" name='course_code'
+              readonly value='{{c.code}}'>
+          </td>
+
+          <td>
+            <input type="name" class="form-control" placeholder="Course Name" aria-label="CourseName" name='course_name'
+              readonly value='{{c.name}}'>
+          </td>
+
+          <td>
+            <input type="name" class="form-control" name='c_id' value='{{c.id}}' readonly hidden>
+          </td>
+
+
           {% if editor %}
-          <td><button type="button" class="btn btn-success">Edit</button>
-            <button type="button" class="btn btn-danger">Delete</button>
+          <td>
+            <button type="button" class="btn btn-success"
+              onclick="makeeditable(this.parentElement.parentElement, 'course-form')">Edit</button>
+            <button type="button" class="btn btn-danger"
+              onclick='this.disabled = true; this.value = "sending";formCompile(this.parentNode.parentNode, 1, "course-form")'>Delete</button>
           </td>
           {% endif %}
         </tr>
@@ -208,4 +276,64 @@
 </div>
 </div>
 
+
+<script>
+  function formCompile(src_elem, is_delete, target_id) {
+    child = src_elem.children;
+    for (var i = 0; i < child.length - 1; i++) {   //Last Cell is submit buttons
+      if (child[i].nodeName == "TD") {
+        field_id = target_id + "-" + child[i].children[0].name;
+        console.log(field_id);
+        field_value = child[i].children[0].value;
+
+        document.getElementById(field_id).value = field_value;
+      }
+    }
+    document.getElementById(target_id + "-is_delete").value = is_delete;
+    document.getElementById(target_id + "-submit").click();
+  }
+
+  function makeeditable(par_elem, form_id) {
+    var children = par_elem.children;
+
+    for (var i = 0; i < children.length; i++) {
+      if (children[i].nodeName == "INPUT" || children[i].nodeName == "TEXTAREA") {
+        if (children[i].readOnly)
+          children[i].readOnly = false;
+        else
+          children[i].readOnly = true;
+      }
+      else if (children[i].nodeName == "BUTTON") {
+        if (children[i].innerHTML == "Edit")
+          children[i].innerHTML = "Cancel";
+        else if (children[i].innerHTML == "Cancel")
+          children[i].innerHTML = "Edit"
+        else if (children[i].innerHTML == "Delete") {
+          children[i].innerHTML = "Done"
+          children[i].className = "btn btn-primary"
+          var val = 'this.disabled = true; this.value = "sending";formCompile(this.parentNode.parentNode, 0, "' + form_id + '")';
+          children[i].setAttribute('onclick', val)
+        }
+        else if (children[i].innerHTML == "Done") {
+          children[i].innerHTML = "Delete"
+          children[i].className = "btn btn-danger"
+          var val = 'this.disabled = true; this.value = "sending";formCompile(this.parentNode.parentNode, 1, "' + form_id + '")';
+          children[i].setAttribute('onclick', val)
+        }
+
+        else if (children[i].type == "submit") {
+          if (children[i].hidden)
+            children[i].hidden = false;
+          else
+            children[i].hidden = true;
+        }
+
+
+      }
+      else {
+        makeeditable(children[i], form_id);
+      }
+    }
+  }
+</script>
 {%endblock %}

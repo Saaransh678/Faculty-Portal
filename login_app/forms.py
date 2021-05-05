@@ -35,7 +35,7 @@ class AppointmentForm(forms.Form):
 
 class NewCourseForm(forms.Form):
     course_code = forms.CharField(max_length=10)
-    course_name = forms.CharField(max_length=100)
+    course_name = forms.CharField(max_length=200)
 
 
 class NewPublicationForm(forms.Form):
@@ -46,3 +46,18 @@ class NewPublicationForm(forms.Form):
 
 class bgform(forms.Form):
     desc = forms.CharField(max_length=400)
+
+
+class PublicationForm(forms.Form):
+    is_delete = forms.IntegerField()
+    pub_id = forms.FloatField()
+    authors = forms.CharField(max_length=350)
+    journ_name = forms.CharField(max_length=300)
+    year = forms.IntegerField()
+
+
+class CoursesForm(forms.Form):
+    c_id = forms.FloatField()
+    is_delete = forms.IntegerField()
+    c_code = forms.CharField(max_length=350)
+    c_name = forms.CharField(max_length=300)

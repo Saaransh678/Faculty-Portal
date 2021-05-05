@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from .forms import LoginForm, NewApplicationForm, RequestForm, ResponseForm, AppointmentForm, NewCourseForm, NewPublicationForm, bgform
+from .forms import LoginForm, NewApplicationForm, RequestForm, ResponseForm, AppointmentForm, NewCourseForm, NewPublicationForm, bgform, PublicationForm, CoursesForm
 from django.contrib import messages
 from django.http import HttpResponse
 # from login_app.models import Faculty, activeleaveentries
@@ -141,6 +141,7 @@ def profile(request, req_id):
     fullname = faculty_details['first_name'] + \
         " " + faculty_details['last_name']
     user_id = faculty_details["FacultyID"]
+
     context_dict = {}
     context_dict['email'] = faculty_details['email']
     context_dict['name'] = fullname
@@ -153,6 +154,94 @@ def profile(request, req_id):
 
     context_dict['editor'] = (requester_id == user_id)
 
+    if request.method == "POST":
+        updates = {}
+        new_course_form = NewCourseForm(request.POST)
+        if new_course_form.is_valid():
+            res = collection.find_one({'fac_id': user_id, 'courses': {
+                                      '$elemMatch': {'code': new_course_form.cleaned_data['course_code']}
+                                      }})
+
+            if res == None:
+                updates["$push"] = {}
+                updates["$push"]['courses'] = {
+                    "id": datetime.now().timestamp(),
+                    'code': new_course_form.cleaned_data['course_code'],
+                    'name': new_course_form.cleaned_data['course_name']
+                }
+
+            else:
+                messages.error(
+                    request, f"You already have an course with Course Code: {new_course_form.cleaned_data['course_code']}")
+                print(res)
+
+        pub_form = NewPublicationForm(request.POST)
+        if pub_form.is_valid():
+            res = collection.find_one({'fac_id': user_id, 'publications': {
+                                      '$elemMatch': {'name': pub_form.cleaned_data['journal_name']}
+                                      }})
+            if res == None:
+                if "$push" not in updates:
+                    updates["$push"] = {}
+
+                updates["$push"]['publications'] = {
+                    "id": datetime.now().timestamp(),
+                    'name': pub_form.cleaned_data['journal_name'],
+                    'authors': pub_form.cleaned_data['authors'],
+                    'year': pub_form.cleaned_data['year']
+                }
+
+            else:
+                messages.error(
+                    request, f"You already have a publication with Title {pub_form.cleaned_data['journal_name']}")
+
+        backgrnd = bgform(request.POST)
+        if backgrnd.is_valid():
+            updates['$set'] = {'background': backgrnd.cleaned_data['desc']}
+
+        pub_edit = PublicationForm(request.POST)
+        if pub_edit.is_valid():
+            if pub_edit.cleaned_data['is_delete']:
+                if "$pull" not in updates:
+                    updates["$pull"] = {}
+                updates["$pull"]["publications"] = {
+                    "id": pub_edit.cleaned_data['pub_id']}
+            else:
+                collection.update(
+                    {'fac_id': user_id,
+                        'publications.id': pub_edit.cleaned_data['pub_id']},
+                    {"$set": {
+                        "publications.$.title": pub_edit.cleaned_data['journ_name'],
+                        "publications.$.year": pub_edit.cleaned_data['year'],
+                        "publications.$.authors": pub_edit.cleaned_data['authors'],
+                    }}
+                )
+
+        course_form = CoursesForm(request.POST)
+        if course_form.is_valid():
+            if course_form.cleaned_data['is_delete']:
+                print(course_form.cleaned_data)
+                if "$pull" not in updates:
+                    updates["$pull"] = {}
+                updates["$pull"]["courses"] = {
+                    "id": course_form.cleaned_data['c_id']}
+            else:
+                collection.update(
+                    {'fac_id': user_id,
+                        'courses.id': course_form.cleaned_data['c_id']},
+                    {"$set": {
+                        "courses.$.name": course_form.cleaned_data['c_name'],
+                        "courses.$.code": course_form.cleaned_data['c_code'],
+                    }}
+                )
+
+        if(bool(updates)):
+            collection.update(
+                {'fac_id': user_id},
+                updates,
+                upsert=True
+            )
+
     profile_data = collection.find_one({'fac_id': user_id})
 
     if profile_data == None:
@@ -162,59 +251,11 @@ def profile(request, req_id):
         for val in fields:
             if val in profile_data:
                 context_dict[val] = profile_data[val]
-                print(context_dict[val])
+                if val != 'background':
+                    for i in range(1, len(context_dict[val])+1):
+                        context_dict[val][i-1]['num'] = i
             else:
                 context_dict[val] = None
-
-    if request.method == "POST":
-        updates = {}
-        course_form = NewCourseForm(request.POST)
-        if course_form.is_valid():
-            res = collection.find_one({'fac_id': user_id, 'courses': {
-                                      '$elemMatch': {'$gt': course_form.cleaned_data['course_code']}
-                                      }})
-
-            if res == None:
-                updates["$push"] = {}
-                updates["$push"]['courses'] = {
-                    'code': course_form.cleaned_data['course_code'],
-                    'name': course_form.cleaned_data['course_name']
-                }
-
-            else:
-                messages.error(
-                    request, f"You already have an course with Course Code: {course_form.cleaned_data['course_code']}")
-
-        pub_form = NewPublicationForm(request.POST)
-        if pub_form.is_valid():
-            res = collection.find_one({'fac_id': user_id, 'publications': {
-                                      '$elemMatch': {'$gt': pub_form.cleaned_data['journal_name']}
-                                      }})
-            if res == None:
-                if "$push" not in updates:
-                    updates["$push"] = {}
-
-                updates["$push"]['publications'] = {
-                    'name': pub_form.cleaned_data['journal_name'],
-                    'authors': pub_form.cleaned_data['authors'],
-                    'year': pub_form.cleaned_data['year']
-                }
-
-            else:
-                messages.error(
-                    request, f"You already have a publication with Title {course_form.cleaned_data['journal_name']}")
-        backgrnd = bgform(request.POST)
-        if backgrnd.is_valid():
-            updates['$set'] = {'background': backgrnd.cleaned_data['desc']}
-
-        else:
-            print(backgrnd.errors)
-
-        collection.update(
-            {'fac_id': user_id},
-            updates,
-            upsert=True
-        )
     conn.close
     return render(request=request, template_name="profile.html", context=context_dict)
 
