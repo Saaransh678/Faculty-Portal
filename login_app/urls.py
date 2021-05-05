@@ -45,5 +45,6 @@ urlpatterns = [
     path('status/', views.status, name="status"),
     path('requests/', views.requests, name="requests"),
     path('appointment/', views.appointment, name="appointment"),
+    path('faculty/', views.faculty, name="faculty"),
     path('mongo_sample/', mongo_funct, name="sample_retreive_mongo"),
 ]
