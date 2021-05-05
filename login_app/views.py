@@ -719,6 +719,12 @@ def appointment(request):
 
     return render(request=request, template_name="appointment.html", context={'deaninfo': deaninfo, 'hodcseinfo': hodcseinfo, 'hodeeinfo': hodeeinfo, 'hodmeinfo': hodmeinfo, 'Mechanical': mech, 'Electrical': elec, 'computer': cse, 'Dean': dean, 'has_permission': perm})
 def faculty(request):
+    if request.method == "POST":
+     
+        form = AppointmentForm(request.POST)
+        if form.is_valid():
+            fac_id=form.cleaned_data['new_fac_id']
+            return redirect(f'/profile/id={fac_id}')
     with connections['default'].cursor() as cursors:
         cursors.execute(
             f"select * from get_personal_id({2})")
