@@ -718,3 +718,87 @@ def appointment(request):
         dean.append(new_val.copy())
 
     return render(request=request, template_name="appointment.html", context={'deaninfo': deaninfo, 'hodcseinfo': hodcseinfo, 'hodeeinfo': hodeeinfo, 'hodmeinfo': hodmeinfo, 'Mechanical': mech, 'Electrical': elec, 'computer': cse, 'Dean': dean, 'has_permission': perm})
+def faculty(request):
+    with connections['default'].cursor() as cursors:
+        cursors.execute(
+            f"select * from get_personal_id({2})")
+        res = cursors.fetchone()
+        res = res[0]
+        deaninfo = {}
+        deaninfo['position'] = posi[1]
+        deaninfo['user_id'] = 2
+        deaninfo['name'] = res['first_name']+" "+res['last_name']
+    with connections['default'].cursor() as cursors:
+        cursors.execute(
+            f"select * from get_personal_id({3})")
+        res = cursors.fetchone()
+        res = res[0]
+        hodcseinfo = {}
+        hodcseinfo['position'] = posi[2]
+        hodcseinfo['user_id'] = 3
+        hodcseinfo['name'] = res['first_name']+" "+res['last_name']
+
+    with connections['default'].cursor() as cursors:
+        cursors.execute(
+            f"select * from get_personal_id({4})")
+        res = cursors.fetchone()
+        res = res[0]
+        hodeeinfo = {}
+        hodeeinfo['position'] = posi[3]
+        hodeeinfo['user_id'] = 4
+        hodeeinfo['name'] = res['first_name']+" "+res['last_name']
+
+    with connections['default'].cursor() as cursors:
+        cursors.execute(
+            f"select * from get_personal_id({5})")
+        res = cursors.fetchone()
+        res = res[0]
+        hodmeinfo = {}
+        hodmeinfo['position'] = posi[4]
+        hodmeinfo['user_id'] = 5
+        hodmeinfo['name'] = res['first_name']+" "+res['last_name']
+
+    mech = []
+    with connections['default'].cursor() as cursors:
+        cursors.execute(f"Select * from get_department_data('ME')")
+        result = cursors.fetchall()
+
+    dean = []
+    for val in result:
+        val = val[0]
+        new_val = {}
+        new_val['facultyid'] = val['FacultyID']
+        new_val['name'] = val['first_name']+" "+val['last_name']
+        new_val['dept'] = 'ME'
+        mech.append(new_val.copy())
+        dean.append(new_val.copy())
+
+    elec = []
+    with connections['default'].cursor() as cursors:
+        cursors.execute(f"Select * from get_department_data('EE')")
+        result = cursors.fetchall()
+
+    for val in result:
+        val = val[0]
+        new_val = {}
+        new_val['facultyid'] = val['FacultyID']
+        new_val['name'] = val['first_name']+" "+val['last_name']
+        new_val['dept'] = 'EE'
+        elec.append(new_val.copy())
+        dean.append(new_val.copy())
+
+    cse = []
+    with connections['default'].cursor() as cursors:
+        cursors.execute(f"Select * from get_department_data('CSE')")
+        result = cursors.fetchall()
+
+    for val in result:
+        val = val[0]
+        new_val = {}
+        new_val['facultyid'] = val['FacultyID']
+        new_val['name'] = val['first_name']+" "+val['last_name']
+        new_val['dept'] = 'CSE'
+        cse.append(new_val.copy())
+        dean.append(new_val.copy())
+    return render(request=request, template_name="faculties.html", context={'deaninfo': deaninfo, 'hodcseinfo': hodcseinfo, 'hodeeinfo': hodeeinfo, 'hodmeinfo': hodmeinfo, 'Mechanical': mech, 'Electrical': elec, 'computer': cse, 'Dean': dean})
+       
