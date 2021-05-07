@@ -36,9 +36,10 @@ def redir(request):
 urlpatterns = [
     # path('', views.login_req),
     path('', views.index),
-    path('profiles/id=<int:id>', url_par, name="faculty_details"),
     path('login/', views.login_req, name="login"),
     path('logout/', views.logoutuser, name="logout"),
+    path('profile/id=<int:req_id>/<str:loc>',
+         views.profile, name="faculty_details"),
     path('profile/id=<int:req_id>', views.profile, name="profile"),
     path('profile/', redir),
     path('application/', views.application, name="application"),

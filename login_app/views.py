@@ -129,7 +129,10 @@ def logoutuser(request):
     return redirect("/login")
 
 
-def profile(request, req_id):
+def profile(request, req_id, loc="home"):
+    # print(loc)
+    params = {'home': 0, 'background': 1, 'publications': 2, 'courses': 3}
+    param_id = params[loc]
     (conn, collection) = mongoconnect()
 
     if request.user.is_anonymous:
@@ -158,6 +161,7 @@ def profile(request, req_id):
         updates = {}
         new_course_form = NewCourseForm(request.POST)
         if new_course_form.is_valid():
+            param_id = 3
             res = collection.find_one({'fac_id': user_id, 'courses': {
                                       '$elemMatch': {'code': new_course_form.cleaned_data['course_code']}
                                       }})
@@ -177,6 +181,7 @@ def profile(request, req_id):
 
         pub_form = NewPublicationForm(request.POST)
         if pub_form.is_valid():
+            param_id = 2
             res = collection.find_one({'fac_id': user_id, 'publications': {
                                       '$elemMatch': {'name': pub_form.cleaned_data['journal_name']}
                                       }})
@@ -197,10 +202,12 @@ def profile(request, req_id):
 
         backgrnd = bgform(request.POST)
         if backgrnd.is_valid():
+            param_id = 1
             updates['$set'] = {'background': backgrnd.cleaned_data['desc']}
 
         pub_edit = PublicationForm(request.POST)
         if pub_edit.is_valid():
+            param_id = 2
             if pub_edit.cleaned_data['is_delete']:
                 if "$pull" not in updates:
                     updates["$pull"] = {}
@@ -219,6 +226,7 @@ def profile(request, req_id):
 
         course_form = CoursesForm(request.POST)
         if course_form.is_valid():
+            param_id = 3
             if course_form.cleaned_data['is_delete']:
                 print(course_form.cleaned_data)
                 if "$pull" not in updates:
@@ -234,6 +242,8 @@ def profile(request, req_id):
                         "courses.$.code": course_form.cleaned_data['c_code'],
                     }}
                 )
+        else:
+            print(course_form.errors)
 
         if(bool(updates)):
             collection.update(
@@ -256,6 +266,8 @@ def profile(request, req_id):
                         context_dict[val][i-1]['num'] = i
             else:
                 context_dict[val] = None
+
+    context_dict['loc'] = param_id
     conn.close
     return render(request=request, template_name="profile.html", context=context_dict)
 
