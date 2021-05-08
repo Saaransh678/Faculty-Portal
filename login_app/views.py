@@ -16,7 +16,7 @@ departments = {'EE': 'Electrical',
                'ME': 'Mechanical', 'CSE': 'Computer Science'}
 
 levels = ['Faculty', 'Head of Department', 'Dean Faculty Affairs', 'Director']
-posi = ["director", "Dean Faculty Affairs", "HOD-cse", "HOD-ee", "HOD-me"]
+posi = ["Director", "Dean Faculty Affairs", "HOD-cse", "HOD-ee", "HOD-me"]
 datetime_format = '%Y-%m-%dT%H:%M:%S'
 
 
@@ -741,6 +741,15 @@ def faculty(request):
             return redirect(f'/profile/id={fac_id}')
     with connections['default'].cursor() as cursors:
         cursors.execute(
+            f"select * from get_personal_id({1})")
+        res = cursors.fetchone()
+        res = res[0]
+        dirinfo = {}
+        dirinfo['position'] = posi[0]
+        dirinfo['user_id'] = 1
+        dirinfo['name'] = res['first_name']+" "+res['last_name']
+    with connections['default'].cursor() as cursors:
+        cursors.execute(
             f"select * from get_personal_id({2})")
         res = cursors.fetchone()
         res = res[0]
@@ -820,4 +829,4 @@ def faculty(request):
         new_val['dept'] = 'CSE'
         cse.append(new_val.copy())
         dean.append(new_val.copy())
-    return render(request=request, template_name="faculties.html", context={'deaninfo': deaninfo, 'hodcseinfo': hodcseinfo, 'hodeeinfo': hodeeinfo, 'hodmeinfo': hodmeinfo, 'Mechanical': mech, 'Electrical': elec, 'computer': cse, 'Dean': dean})
+    return render(request=request, template_name="faculties.html", context={'deaninfo': deaninfo,'dirinfo': dirinfo, 'hodcseinfo': hodcseinfo, 'hodeeinfo': hodeeinfo, 'hodmeinfo': hodmeinfo, 'Mechanical': mech, 'Electrical': elec, 'computer': cse, 'Dean': dean})
