@@ -16,7 +16,7 @@ departments = {'EE': 'Electrical',
                'ME': 'Mechanical', 'CSE': 'Computer Science'}
 
 levels = ['Faculty', 'Head of Department', 'Dean Faculty Affairs', 'Director']
-posi = ["director", "Dean Faculty Affairs", "HOD-cse", "HOD-ee", "HOD-me"]
+posi = ["Director", "Dean Faculty Affairs", "HOD-cse", "HOD-ee", "HOD-me"]
 datetime_format = '%Y-%m-%dT%H:%M:%S'
 
 
@@ -749,6 +749,15 @@ def faculty(request):
         if form.is_valid():
             fac_id = form.cleaned_data['new_fac_id']
             return redirect(f'/profile/id={fac_id}')
+    with connections['default'].cursor() as cursors:
+        cursors.execute(
+            f"select * from get_personal_id({1})")
+        res = cursors.fetchone()
+        res = res[0]
+        dirinfo = {}
+        dirinfo['position'] = posi[0]
+        dirinfo['user_id'] = 1
+        dirinfo['name'] = res['first_name']+" "+res['last_name']
     with connections['default'].cursor() as cursors:
         cursors.execute(
             f"select * from get_personal_id({2})")
