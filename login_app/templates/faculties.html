@@ -1,3 +1,6 @@
+{% extends 'logined.html' %}
+
+{% block content %}
 <!doctype html>
 <html lang="en">
 
@@ -57,50 +60,58 @@
                     <tr>
                         <td><b>{{deaninfo.name}}</b></td>
                         <td>{{deaninfo.position}}</td>
-                        <td><form method="post" class="AppointmentForm">
-                            {% csrf_token %}
-                            <label for="new_fac_id" hidden>Faculty ID</label>
-                            <input type="number" name="new_fac_id" value="{{deaninfo.user_id}}" hidden>
-                            <label for="post_id" hidden>Post</label>
-                            <input type="number" name="post_id" value="3" hidden>
-                            <button type="submit" class="btn btn-primary">Visit Profile</button>
-                        </form></td>
+                        <td>
+                            <form method="post" class="AppointmentForm">
+                                {% csrf_token %}
+                                <label for="new_fac_id" hidden>Faculty ID</label>
+                                <input type="number" name="new_fac_id" value="{{deaninfo.user_id}}" hidden>
+                                <label for="post_id" hidden>Post</label>
+                                <input type="number" name="post_id" value="3" hidden>
+                                <button type="submit" class="btn btn-primary">Visit Profile</button>
+                            </form>
+                        </td>
                     </tr>
                     <tr>
                         <td><b>{{hodcseinfo.name}}</b></td>
                         <td>{{hodcseinfo.position}}</td>
-                        <td><form method="post" class="AppointmentForm">
-                            {% csrf_token %}
-                            <label for="new_fac_id" hidden>Faculty ID</label>
-                            <input type="number" name="new_fac_id" value="{{hodcseinfo.user_id}}" hidden>
-                            <label for="post_id" hidden>Post</label>
-                            <input type="number" name="post_id" value="3" hidden>
-                            <button type="submit" class="btn btn-primary">Visit Profile</button>
-                        </form></td>
+                        <td>
+                            <form method="post" class="AppointmentForm">
+                                {% csrf_token %}
+                                <label for="new_fac_id" hidden>Faculty ID</label>
+                                <input type="number" name="new_fac_id" value="{{hodcseinfo.user_id}}" hidden>
+                                <label for="post_id" hidden>Post</label>
+                                <input type="number" name="post_id" value="3" hidden>
+                                <button type="submit" class="btn btn-primary">Visit Profile</button>
+                            </form>
+                        </td>
                     </tr>
                     <tr>
                         <td><b>{{hodeeinfo.name}}</b></td>
                         <td>{{hodeeinfo.position}}</td>
-                        <td><form method="post" class="AppointmentForm">
-                            {% csrf_token %}
-                            <label for="new_fac_id" hidden>Faculty ID</label>
-                            <input type="number" name="new_fac_id" value="{{hodeeinfo.user_id}}" hidden>
-                            <label for="post_id" hidden>Post</label>
-                            <input type="number" name="post_id" value="3" hidden>
-                            <button type="submit" class="btn btn-primary">Visit Profile</button>
-                        </form></td>
+                        <td>
+                            <form method="post" class="AppointmentForm">
+                                {% csrf_token %}
+                                <label for="new_fac_id" hidden>Faculty ID</label>
+                                <input type="number" name="new_fac_id" value="{{hodeeinfo.user_id}}" hidden>
+                                <label for="post_id" hidden>Post</label>
+                                <input type="number" name="post_id" value="3" hidden>
+                                <button type="submit" class="btn btn-primary">Visit Profile</button>
+                            </form>
+                        </td>
                     </tr>
                     <tr>
                         <td><b>{{hodmeinfo.name}}</b></td>
                         <td>{{hodmeinfo.position}}</td>
-                        <td><form method="post" class="AppointmentForm">
-                            {% csrf_token %}
-                            <label for="new_fac_id" hidden>Faculty ID</label>
-                            <input type="number" name="new_fac_id" value="{{hodmeinfo.user_id}}" hidden>
-                            <label for="post_id" hidden>Post</label>
-                            <input type="number" name="post_id" value="3" hidden>
-                            <button type="submit" class="btn btn-primary">Visit Profile</button>
-                        </form></td>
+                        <td>
+                            <form method="post" class="AppointmentForm">
+                                {% csrf_token %}
+                                <label for="new_fac_id" hidden>Faculty ID</label>
+                                <input type="number" name="new_fac_id" value="{{hodmeinfo.user_id}}" hidden>
+                                <label for="post_id" hidden>Post</label>
+                                <input type="number" name="post_id" value="3" hidden>
+                                <button type="submit" class="btn btn-primary">Visit Profile</button>
+                            </form>
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -197,3 +208,4 @@
 </body>
 
 </html>
+{%endblock %}

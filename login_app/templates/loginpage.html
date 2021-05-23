@@ -1,3 +1,6 @@
+{% extends 'logined.html' %}
+
+{% block content %}
 <!doctype html>
 <html lang="en">
 
@@ -16,11 +19,6 @@
 </head>
 
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
- <div class="container-fluid">
-    <a class="navbar-brand" href="/faculty">Faculty</a>
-    </div>
-</nav>
     <script id="Dummy Script">0</script>
     {% if messages %}
     {% for message in messages %}
@@ -72,4 +70,7 @@
 
 
 </body>
+
 </html>
+
+{%endblock %}

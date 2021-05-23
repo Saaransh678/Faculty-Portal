@@ -390,7 +390,9 @@ def requests(request):
                 val.id, facul_id, True, True, user_id)
         entries.append(obj.copy())
 
-    return render(request=request, template_name="requests.html", context={'details': entries, 'has_permission': perm_level})
+    print(entries)
+
+    return render(request=request, template_name="requests.html", context={'details': entries, 'has_permission': perm_level, 'editor': True})
 
 
 def application(request):
@@ -433,7 +435,7 @@ def application(request):
         else:
             print(form.error)
 
-    return render(request=request, template_name="application.html", context={'has_permission': perm, 'max_leaves': leave_cnt})
+    return render(request=request, template_name="application.html", context={'has_permission': perm, 'max_leaves': leave_cnt, 'editor': True})
 
 
 def get_faculty_details(FacID):
@@ -443,14 +445,17 @@ def get_faculty_details(FacID):
 
 def get_comments_by_entryID(entryID, user_id, is_act=False, is_third_party=False, third_id=-1):
     comp_id = -1
+
     if is_third_party:
         comp_id = third_id
     else:
         comp_id = user_id
+
     querry = f'SELECT * FROM "main_decision_record" WHERE "EntryID" = {entryID} and is_active = {is_act} ORDER BY timecreated'
     comm = Decision_Record.objects.raw(querry)
     curr_com = []
     for com_entry in comm:
+        # print(com_entry.body, com_entry.DecisionMakerID)
         com = {}
         com['body'] = com_entry.body
         com['verdict'] = com_entry.verdict
@@ -459,14 +464,19 @@ def get_comments_by_entryID(entryID, user_id, is_act=False, is_third_party=False
         if int(com_entry.DecisionMakerID) == int(comp_id):
             com['from'] = 'Me'
         else:
-            res = get_faculty_details(com_entry.DecisionMakerID)
-            for details in res:
-                from_post = levels[details.permission_level]
-                if details.permission_level == 0:
-                    return "-1"
-                if details.permission_level == 1:
-                    from_post += " " + departments[details.dept]
-                com['from'] = from_post
+            # res = get_faculty_details(com_entry.DecisionMakerID)
+            details = getBaseDetails(com_entry.DecisionMakerID)
+            # for details in res:
+            # print(res)
+            print(details)
+
+            from_post = levels[details['permission_level']]
+            if details['permission_level'] == 0:
+                from_post = details['first_name'] + " "+details['last_name']
+            elif details['permission_level'] == 1:
+                from_post += " " + departments[details['dept']]
+            com['from'] = from_post
+
         curr_com.append(com)
 
     return curr_com
@@ -593,7 +603,7 @@ def status(request):
 
     # print(previous_entries, active)
 
-    return render(request=request, template_name="status.html", context={'atv': active, 'act_cnt': len(active), 'past': previous_entries, 'past_cnt': len(previous_entries), 'has_permission': perm})
+    return render(request=request, template_name="status.html", context={'atv': active, 'act_cnt': len(active), 'past': previous_entries, 'past_cnt': len(previous_entries), 'has_permission': perm, 'editor': True})
 
 
 def appointment(request):
@@ -729,7 +739,7 @@ def appointment(request):
         cse.append(new_val.copy())
         dean.append(new_val.copy())
 
-    return render(request=request, template_name="appointment.html", context={'deaninfo': deaninfo, 'hodcseinfo': hodcseinfo, 'hodeeinfo': hodeeinfo, 'hodmeinfo': hodmeinfo, 'Mechanical': mech, 'Electrical': elec, 'computer': cse, 'Dean': dean, 'has_permission': perm})
+    return render(request=request, template_name="appointment.html", context={'deaninfo': deaninfo, 'hodcseinfo': hodcseinfo, 'hodeeinfo': hodeeinfo, 'hodmeinfo': hodmeinfo, 'Mechanical': mech, 'Electrical': elec, 'computer': cse, 'Dean': dean, 'has_permission': perm, 'editor': True})
 
 
 def faculty(request):
@@ -820,4 +830,7 @@ def faculty(request):
         new_val['dept'] = 'CSE'
         cse.append(new_val.copy())
         dean.append(new_val.copy())
-    return render(request=request, template_name="faculties.html", context={'deaninfo': deaninfo, 'hodcseinfo': hodcseinfo, 'hodeeinfo': hodeeinfo, 'hodmeinfo': hodmeinfo, 'Mechanical': mech, 'Electrical': elec, 'computer': cse, 'Dean': dean})
+
+    logged_in = request.user.is_anonymous
+
+    return render(request=request, template_name="faculties.html", context={'deaninfo': deaninfo, 'hodcseinfo': hodcseinfo, 'hodeeinfo': hodeeinfo, 'hodmeinfo': hodmeinfo, 'Mechanical': mech, 'Electrical': elec, 'computer': cse, 'Dean': dean, 'editor': not logged_in})
